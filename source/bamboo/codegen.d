@@ -62,7 +62,7 @@ string generateFile(Module file, string moduleName)
         format ~= ";";
     }
     format ~= "import bamboo.codegen;";
-    format ~= "mixin(Primitives);";
+    format ~= "private { mixin(Primitives); }";
     format ~= generateModule(file);
 
     return format;
