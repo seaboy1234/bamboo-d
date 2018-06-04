@@ -1,0 +1,17 @@
+{
+	"name": "bamboo-d",
+	"authors": [
+		"Christian Wilson"
+	],
+	"dependencies": {
+		"boilerplate": "~>0.0.21",
+		"pegged": "~>0.4.3"
+	},
+	"description": "An implementation of the Bamboo/DClass format for the D Programming Language.",
+	"copyright": "Copyright © 2018, Christian",
+	"license": "BSD 3-clause",
+	"targetPath": "build",
+	"versions": [
+		"broken_parents"
+	]
+}

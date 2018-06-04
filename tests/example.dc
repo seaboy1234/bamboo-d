@@ -1,0 +1,12 @@
+/**
+ *  Defines a DistributedTestObject.
+ */
+dclass DistributedTestObject {
+    test(char optional = 'a',
+         int32(0-10) / 100 optional = { 10 / 2 + 10 % 360},
+         float64(0-10) / 100 optional = 5,
+         string(0-10) optional = "default",
+         Location loc,
+         int32 optional[1-10]
+    ) airecv;
+};
