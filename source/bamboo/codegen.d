@@ -67,6 +67,7 @@ string generateFile(Module file, string moduleName = "", string distributedObjec
         format ~= moduleName;
         format ~= ";";
     }
+    format ~= "import std.exception;";
     format ~= "import bamboo.codegen;";
     format ~= "import " ~ distributedObjectModule ~ " : DistributedObject;";
     format ~= "private { mixin(Primitives); }";
