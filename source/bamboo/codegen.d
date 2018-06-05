@@ -45,6 +45,7 @@ mixin(blobTypes);
 struct TypeId
 {
     int id;
+    string name;
 }
 
 /// Provides metadata for D introspection on dclass fields.
@@ -103,7 +104,7 @@ private:
 string generateClass(ClassDeclaration cls)
 {
     string format;
-    format ~= "@TypeId(" ~ cls.id.to!string ~ ")";
+    format ~= "@TypeId(" ~ cls.id.to!string ~ ", `" ~ cls.symbol ~ "`)";
     format ~= "class ";
     format ~= cls.symbol;
 
@@ -136,7 +137,7 @@ string generateClass(ClassDeclaration cls)
 string generateStruct(StructDeclaration strct)
 {
     string format;
-    format ~= "@TypeId(" ~ strct.id.to!string ~ ")";
+    format ~= "@TypeId(" ~ strct.id.to!string ~ ", `" ~ strct.symbol ~ "`)";
     format ~= "struct ";
     format ~= strct.symbol;
     format ~= " {";
