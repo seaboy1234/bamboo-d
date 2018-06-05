@@ -200,16 +200,38 @@ string generateAtomic(AtomicField field)
 {
     string format;
 
+    bool isComplex = field.parameters.length > 1;
+    string name;
+
     if (field.name.startsWith("set"))
     {
+        name = field.name[3 .. $];
+        if (isComplex)
+        {
+            format ~= "struct " ~ name ~ "_t {";
         foreach (parameter; field.parameters)
         {
-            format ~= "private " ~ generateDefinition(parameter) ~ "_" ~ field.name ~ ";";
+                format ~= generateDefinition(parameter) ~ ";";
+            }
+            format ~= "}";
+            format ~= "private " ~ name ~ "_t _" ~ name ~ "; ";
         }
+        else if (field.parameters.length == 1)
+        {
+            auto parameter = field.parameters[0];
+            format ~= "private " ~ generateDefinition(parameter) ~ "_" ~ name ~ ";";
+        }
+        else
+        {
+            assert(0, name ~ " is a setter with no value!");
+        }
+        }
+    else
+    {
+        name = field.name;
     }
-
     format ~= "@FieldId(" ~ field.id.to!string ~ ")";
-    foreach(keyword; field.keywords) 
+    foreach (keyword; field.keywords)
     {
         format ~= " @" ~ keyword;
     }
@@ -227,9 +249,19 @@ string generateAtomic(AtomicField field)
 
     if (field.name.startsWith("set"))
     {
+        if (isComplex)
+        {
         foreach (parameter; field.parameters)
         {
-            format ~= parameter.symbol ~ "_" ~ field.name ~ "=" ~ parameter.symbol ~ ";";
+                format ~= "_" ~ name ~ "." ~ parameter.symbol;
+                format ~= "=" ~ parameter.symbol ~ ";";
+            }
+        }
+        else if (field.parameters.length == 1)
+        {
+            auto parameter = field.parameters[0];
+            format ~= parameter.symbol ~ "_" ~ name;
+            format ~= "=" ~ parameter.symbol ~ ";";
         }
     }
     else
