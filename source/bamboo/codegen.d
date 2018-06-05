@@ -209,7 +209,11 @@ string generateAtomic(AtomicField field)
     }
 
     format ~= "@FieldId(" ~ field.id.to!string ~ ")";
-    format ~= "void ";
+    foreach(keyword; field.keywords) 
+    {
+        format ~= " @" ~ keyword;
+    }
+    format ~= " void ";
     format ~= field.symbol;
 
     format ~= "(";
@@ -240,7 +244,14 @@ string generateAtomic(AtomicField field)
 
 string generateParameterField(ParameterField field)
 {
-    return "@FieldId(" ~ field.id.to!string ~ ")" ~ generateDefinition(field.parameter) ~ ";";
+    string format;
+    format ~= "@FieldId(" ~ field.id.to!string ~ ")";
+    foreach(keyword; field.keywords) 
+    {
+        format ~= " @" ~ keyword ~ " ";
+    }
+    format ~= generateDefinition(field.parameter) ~ ";";
+    return format;
 }
 
 string generateCallFor(FieldDeclaration field)
