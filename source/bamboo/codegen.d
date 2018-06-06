@@ -54,6 +54,12 @@ struct FieldId
     int id;
 }
 
+/// Provides metadata for D introspection on dclass fields.
+struct FieldType(T)
+{
+    T typeInit = T.init;
+}
+
 /// Generates D source code from a given module.  It will optionally declare a D module.
 /// This utility function also imports codegen helpers and privately aliases dclass primitives.
 /// This function is suitable for creating a self-contained file.
@@ -201,9 +207,10 @@ string generateAtomic(AtomicField field)
     string format;
 
     bool isComplex = field.parameters.length > 1;
+    bool isProperty = field.name.startsWith("set");
     string name;
 
-    if (field.name.startsWith("set"))
+    if (isProperty)
     {
         name = field.name[3 .. $];
         if (isComplex)
@@ -230,10 +237,25 @@ string generateAtomic(AtomicField field)
     {
         name = field.name;
     }
-    format ~= "@FieldId(" ~ field.id.to!string ~ ")";
+    format ~= "@FieldId(" ~ field.id.to!string ~ ") ";
+    
+    if (isProperty)
+    {
+        string fieldType;
+        if(isComplex)
+        {
+            fieldType = name ~ "_t";
+        }
+        else
+        {
+            fieldType = generateDefinition(field.parameters[0]).split(' ')[0];
+        }
+        format ~= "@FieldType!(" ~ fieldType ~ ") ";
+    }
+
     foreach (keyword; field.keywords)
     {
-        format ~= " @" ~ keyword;
+        format ~= "@" ~ keyword ~ " ";
     }
     format ~= " void ";
     format ~= field.symbol;
@@ -247,7 +269,7 @@ string generateAtomic(AtomicField field)
         format ~= generateContractFor(parameter);
     }
 
-    if (field.name.startsWith("set"))
+    if (isProperty)
     {
         if (isComplex)
         {
@@ -277,8 +299,10 @@ string generateAtomic(AtomicField field)
 string generateParameterField(ParameterField field)
 {
     string format;
-    format ~= "@FieldId(" ~ field.id.to!string ~ ")";
-    foreach(keyword; field.keywords) 
+    format ~= "@FieldId(" ~ field.id.to!string ~ ") ";
+    format ~= "@FieldType!(" ~ generateDefinition(field.parameter).split(' ')[0] ~ ") ";
+    
+    foreach (keyword; field.keywords)
     {
         format ~= " @" ~ keyword ~ " ";
     }
