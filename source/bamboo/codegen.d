@@ -262,13 +262,23 @@ string generateAtomic(AtomicField field)
 
     format ~= "(";
     format ~= generateParameterListFor(field);
-    format ~= ") {";
+    format ~= ")";
+
+    string contracts;
 
     foreach (parameter; field.parameters)
     {
-        format ~= generateContractFor(parameter);
+        contracts ~= generateContractFor(parameter);
+    }
+    if (contracts.length > 0)
+    {
+        format ~= " in {";
+        format ~= contracts;
+        format ~= "}";
+        format ~= "body";
     }
 
+        format ~= "{";
     if (isProperty)
     {
         if (isComplex)
@@ -564,8 +574,8 @@ string generateContractFor(Parameter parameter)
 string generateContract(SizedParameter array)
 {
     enum string format = `
-    enforce(${parameter}.length <= ${maxLength}, "${parameter} is oversized!");
-    enforce(${parameter}.length >= ${minLength}, "${parameter} is undersized!");
+    assert(${parameter}.length <= ${maxLength}, "${parameter} is oversized!");
+    assert(${parameter}.length >= ${minLength}, "${parameter} is undersized!");
     `;
 
     if (!array.hasRange)
@@ -583,8 +593,8 @@ string generateContract(SizedParameter array)
 string generateContract(ArrayParameter array)
 {
     enum string format = `
-    enforce(${parameter}.length <= ${maxLength}, "${parameter} is oversized!");
-    enforce(${parameter}.length >= ${minLength}, "${parameter} is undersized!");
+    assert(${parameter}.length <= ${maxLength}, "${parameter} is oversized!");
+    assert(${parameter}.length >= ${minLength}, "${parameter} is undersized!");
     `;
 
     if (!array.hasRange)
@@ -603,7 +613,7 @@ string generateContract(NumericParameter numeric)
 {
     string formatStr(string parameter, string op, string value, string msg)
     {
-        return `enforce(` ~ parameter ~ ` ` ~ op ~ ` ` ~ value ~ `, "` ~ parameter
+        return `assert(` ~ parameter ~ ` ` ~ op ~ ` ` ~ value ~ `, "` ~ parameter
             ~ ` is too ` ~ msg ~ `!");`;
     }
 
