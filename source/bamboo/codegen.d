@@ -141,7 +141,7 @@ string generateClass(ClassDeclaration cls, bool generateStubs)
     string format;
     format ~= "@TypeId(" ~ cls.id.to!string ~ ", `" ~ cls.symbol ~ "`) ";
 
-    if (generateStubs)
+    if (!generateStubs)
     {
         format ~= "abstract ";
     }
@@ -318,7 +318,7 @@ string generateAtomic(AtomicField field, bool stub)
     if (isProperty)
     {
         name = cast(char)(field.name[3].toLower) ~ field.name[4 .. $];
-        if (!stub)
+        if (stub)
         {
             if (isComplex)
             {
@@ -350,7 +350,7 @@ string generateAtomic(AtomicField field, bool stub)
 
     if (isProperty)
     {
-        if (isComplex && !stub)
+        if (isComplex && stub)
         {
             fieldType = name ~ "_t";
         }
@@ -358,7 +358,7 @@ string generateAtomic(AtomicField field, bool stub)
         {
             fieldType = generateDefinition(field.parameters[0]).split(' ')[0];
         }
-        if (!stub)
+        if (stub)
         {
             format ~= "@FieldType!(" ~ fieldType ~ ") ";
         }
@@ -369,7 +369,7 @@ string generateAtomic(AtomicField field, bool stub)
         format ~= "@" ~ keyword ~ " ";
     }
 
-    if (stub)
+    if (!stub)
     {
         format ~= " abstract ";
     }
@@ -404,13 +404,13 @@ string generateAtomic(AtomicField field, bool stub)
         format ~= " in {";
         format ~= contracts;
         format ~= "}";
-        if (!stub)
+        if (stub)
         {
             format ~= "body";
         }
     }
 
-    if (!stub)
+    if (stub)
     {
         format ~= "{";
         if (isProperty)
@@ -444,7 +444,7 @@ string generateAtomic(AtomicField field, bool stub)
 
     if (!isComplex && isProperty)
     {
-        if (stub)
+        if (!stub)
         {
             format ~= "abstract " ~ fieldType ~ " " ~ name ~ "() inout @property;";
         }
@@ -464,7 +464,7 @@ string generateParameterField(ParameterField field, bool stub)
         format ~= " @" ~ keyword ~ " ";
     }
 
-    if (stub)
+    if (!stub)
     {
         string def = generateDefinition(field.parameter);
         format ~= "abstract void " ~ def.split(' ')[1] ~ "(" ~ def.split(' ')[0] ~ ") @property;";
