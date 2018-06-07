@@ -4,14 +4,19 @@ import bamboo.parser;
 import bamboo.types;
 import bamboo.util;
 
+Module parseString(string source)
+{
+    auto node = DClass(source);
+    auto completed = transform(node);
+    return completed;
+}
+
 /// Given a path, parses a DC file.
 /// Returns: a `Module`, representing the parsed file.
 Module parseModule(string file)
 {
     import std.file : readText;
-    auto node = DClass(readText(file));
-    auto completed = transform(node);
-    return completed;
+    return parseString(readText(file));
 }
 
 /// Destructively mutates `file`, appending members from `other`.

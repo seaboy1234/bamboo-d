@@ -87,10 +87,20 @@ string generateFile(Module file, string moduleName = "",
     return format;
 }
 
+/// Ditto.
+string generateFile(string dcFile, string moduleName = "",
+        string distributedObjectModule = "libastrond", bool generateStubs = true)
+{
+    import bamboo.astgen : parseModule;
+
+    Module file = parseModule(dcFile);
+    return generateFile(file, moduleName, distributedObjectModule, generateStubs);
+}
+
 /// Generates D source code from a given module. This function is 
 /// suitable for mixing into a larger D source file.
 /// See_Also: $(D generateFile).
-string generateModule(Module file, bool generateStubs = false)
+string generateModule(Module file, bool generateStubs = true)
 {
     string format;
 
@@ -107,6 +117,15 @@ string generateModule(Module file, bool generateStubs = false)
     }
 
     return format;
+}
+
+/// Ditto.
+string generateModule(string dcFile, bool generateStubs = true)
+{
+    import bamboo.astgen : parseModule;
+
+    Module file = parseModule(dcFile);
+    return generateModule(file, generateStubs);
 }
 
 private:
@@ -721,7 +740,7 @@ string mapType(string type)
         ];
     // dfmt on
 
-    if(auto ret = type in types)
+    if (auto ret = type in types)
     {
         return *ret;
     }
