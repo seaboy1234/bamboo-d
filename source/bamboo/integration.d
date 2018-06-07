@@ -39,9 +39,9 @@ typedef uint32 zoneId;
 typedef uint64 channel;
 
 // The Python Views for these distributed classes.
-from simple_example import LoginManager/AI/UD
-from simple_example import DistributedMaproot/AI/UD
-from simple_example import DistributedAvatar/AI/OV
+from simple_example.objects import LoginManager/AI/UD
+from simple_example.objects import DistributedMaproot/AI/UD
+from simple_example.objects import DistributedAvatar/AI/OV
 
 // A simple DOG for username/password authentication and handoff to
 // the DistributedMaproot for avatar creation.
@@ -137,10 +137,12 @@ unittest
         {
             return _name;
         }
+
         override void name(string value) @property
         {
             _name = value;
         }
+
         override void setXYZH(float x, float y, float z, short h)
         {
             _x = x;
@@ -148,10 +150,22 @@ unittest
             _z = z;
             _h = h;
         }
+
         override void indicateIntent(float x, float y)
         {
             _tx = x;
             _ty = y;
         }
     }
+}
+
+unittest
+{
+    import std.stdio : File;
+
+    Module file = parseModule("tests/direct.dc");
+
+    string generated = generateFile(file);
+
+    assert(file.symbol == "direct.distributed");
 }
