@@ -101,20 +101,20 @@ DClass:
     QualifiedIdentifier <~ Identifier ("." Identifier)*
     ImportList < Identifier ("/" Identifier)*
 
-    TypeDecl < KeywordType / StructType / ClassType / AliasType
+    TypeDecl < (KeywordType / StructType / ClassType / AliasType) ";"
 
     # Alias Types
-    AliasType < "typedef" (dataType / Identifier) Identifier ";"
+    AliasType < "typedef" (dataType / Identifier) Identifier
 
     # Keywords
     KeywordType < "keyword" Identifier
     KeywordList < Identifier+
 
     # Struct Type
-    StructType < "struct" Identifier "{" (Parameter ";")+ "};"
+    StructType < "struct" Identifier "{" (Parameter ";")+ "}"
 
     # Class Type
-    ClassType < "dclass" Identifier (":" Identifier)? "{" (FieldDecl ";")+ "};"
+    ClassType < "dclass" Identifier (":" Identifier)? "{" (FieldDecl ";")+ "}"
 
     # Field Types
     FieldDecl < (MolecularField / AtomicField / ParameterField)
