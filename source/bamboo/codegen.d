@@ -72,7 +72,7 @@ string generateFile(Module file, string moduleName = "",
 {
     string format;
 
-    if(moduleName.length == 0)
+    if (moduleName.length == 0)
     {
         moduleName = file.symbol;
     }
@@ -318,6 +318,10 @@ string generateAtomic(AtomicField field, bool stub)
     if (isProperty)
     {
         name = cast(char)(field.name[3].toLower) ~ field.name[4 .. $];
+        if (name[1 .. $].count!(x => isUpper(cast(dchar) x)) == name.length - 1)
+        {
+            name = field.name[3 .. $];
+        }
         if (stub)
         {
             if (isComplex)
@@ -333,7 +337,8 @@ string generateAtomic(AtomicField field, bool stub)
             else if (field.parameters.length == 1)
             {
                 auto parameter = field.parameters[0];
-                format ~= "private " ~ generateDefinition(parameter) ~ "_" ~ name ~ ";";
+                format ~= "private " ~ generateDefinition(parameter).split(' ')[0] ~ " _"
+                    ~ name ~ ";";
             }
             else
             {
@@ -426,7 +431,7 @@ string generateAtomic(AtomicField field, bool stub)
             else if (field.parameters.length == 1)
             {
                 auto parameter = field.parameters[0];
-                format ~= parameter.symbol ~ "_" ~ name;
+                format ~= "_" ~ name;
                 format ~= "=" ~ parameter.symbol ~ ";";
             }
         }
@@ -442,11 +447,29 @@ string generateAtomic(AtomicField field, bool stub)
         format ~= ";";
     }
 
-    if (!isComplex && isProperty)
+    if (isProperty)
     {
-        if (!stub)
+        if (!isComplex)
         {
-            format ~= "abstract " ~ fieldType ~ " " ~ name ~ "() inout @property;";
+            if (!stub)
+            {
+                format ~= "abstract " ~ fieldType ~ " " ~ name ~ "() inout @property;";
+            }
+            else
+            {
+                format ~= fieldType ~ " " ~ name ~ "() inout @property { ";
+                format ~= "return _" ~ name ~ ";";
+                format ~= "}";
+            }
+        }
+        else
+        {
+            if (stub)
+            {
+                format ~= "auto " ~ name ~ "() inout @property {";
+                format ~= "return _" ~ name ~ ";";
+                format ~= "}";
+            }
         }
     }
 
@@ -456,6 +479,10 @@ string generateAtomic(AtomicField field, bool stub)
 string generateParameterField(ParameterField field, bool stub)
 {
     string format;
+    string def = generateDefinition(field.parameter);
+    string type = def.split(' ')[0];
+    string name = def.split(' ')[1];
+
     format ~= "@FieldId(" ~ field.id.to!string ~ ") ";
     format ~= "@FieldType!(" ~ generateDefinition(field.parameter).split(' ')[0] ~ ") ";
 
@@ -466,13 +493,18 @@ string generateParameterField(ParameterField field, bool stub)
 
     if (!stub)
     {
-        string def = generateDefinition(field.parameter);
-        format ~= "abstract void " ~ def.split(' ')[1] ~ "(" ~ def.split(' ')[0] ~ ") @property;";
+        format ~= "abstract void " ~ name ~ "(" ~ type ~ " value) @property;";
         format ~= "abstract " ~ def ~ "();";
     }
     else
     {
-        format ~= generateDefinition(field.parameter) ~ ";";
+        format ~= "void " ~ name ~ "(" ~ type ~ " value) @property {";
+        format ~= "_" ~ name ~ " = value;";
+        format ~= "}";
+        format ~= type ~ " " ~ name ~ "() inout @property {";
+        format ~= "return _" ~ name ~ ";";
+        format ~= "}";
+        format ~= type ~ " _" ~ name ~ ";";
     }
 
     return format;
