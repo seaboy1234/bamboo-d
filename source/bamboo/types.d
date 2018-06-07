@@ -239,9 +239,10 @@ class Module : SyntaxNode
     {
         import std.array : array;
         import std.algorithm : sort;
+        import std.conv;
         import std.range : chain;
 
-        return (cast(TypeDeclaration[]) classes).chain(cast(TypeDeclaration[]) structs)
+        return (to!(TypeDeclaration[])(classes)).chain(to!(TypeDeclaration[])(structs))
             .sort!("a.id < b.id").array;
     }
 
