@@ -143,12 +143,11 @@ string generateClass(ClassDeclaration cls, bool generateStubs)
     format ~= "class ";
     format ~= cls.symbol;
 
-    format ~= " : ";
     if (cls.hasSuperclass)
     {
+        format ~= " : ";
         format ~= cls.parents[0].symbol;
     }
-
 
     format ~= "{";
 
