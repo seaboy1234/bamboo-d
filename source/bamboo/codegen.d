@@ -412,7 +412,7 @@ string generateAtomic(AtomicField field, bool stub)
     {
         format ~= "{";
         if (isProperty)
-        {   
+        {
             if (isComplex)
             {
                 foreach (parameter; field.parameters)
@@ -465,8 +465,8 @@ string generateParameterField(ParameterField field, bool stub)
     if (stub)
     {
         string def = generateDefinition(field.parameter);
+        format ~= "abstract void " ~ def.split(' ')[1] ~ "(" ~ def.split(' ')[0] ~ ") @property;";
         format ~= "abstract " ~ def ~ "();";
-        format ~= "abstract " ~ def ~ "(" ~ def.split(' ')[0] ~ ") @property;";
     }
     else
     {
