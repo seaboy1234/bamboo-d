@@ -86,7 +86,22 @@ string generateFile(Module file, string moduleName = "",
     }
     format ~= "import std.exception;";
     format ~= "import bamboo.codegen;";
-    format ~= "import " ~ distributedObjectModule ~ " : DistributedObject;";
+    format ~= "import " ~ distributedObjectModule ~ ";";
+
+    foreach (imprt; file.importDeclarations)
+    {
+        if (imprt.packageName == moduleName)
+        {
+            continue;
+        }
+        format ~= "import " ~ imprt.packageName ~ " : ";
+        foreach (type; imprt.symbols[0 .. $ - 1])
+        {
+            format ~= type ~ ", ";
+        }
+        format ~= imprt.symbols[$ - 1] ~ ";";
+    }
+
     format ~= "private { mixin(Primitives); }";
     format ~= generateModule(file, generateStubs);
 
