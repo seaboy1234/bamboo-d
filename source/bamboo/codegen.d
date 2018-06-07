@@ -1,8 +1,11 @@
 module bamboo.codegen;
 
+import std.algorithm;
+import std.array;
 import std.conv;
 import std.math;
 import std.string;
+import std.uni;
 
 import bamboo.hashgen;
 import bamboo.types;
@@ -209,6 +212,78 @@ string generateMolecular(MolecularField field)
     return format;
 }
 
+/**
+ * This function generates parameter names from a field's name.
+ * 
+ * Notes: 
+ *      Some fields follow the pattern of, e.g., `setXYZ(float32, float32, float32)`.
+ *      Using the name generator, ugly parameter names will be generated when 
+ *      enough semantic information is already available to properly generate
+ *      parameter names.
+ *
+ *      This method would take `setXYZ(float32, float32, float32)` and transform
+ *      it to `setXYZ(float32 x, float32, y, float32 z)`, for example.
+ */
+void autogenParameterNames(AtomicField field)
+{
+    if (!field.symbol.startsWith("set"))
+    {
+        return;
+    }
+
+    foreach (parameter; field.parameters)
+    {
+        if (parameter.symbol.length > 0)
+        {
+            return;
+        }
+    }
+
+    string name = field.symbol[3 .. $];
+    if (name.filter!(a => isUpper(cast(dchar) a))().array.length != field.parameters.length)
+    {
+        return;
+    }
+
+    int start;
+    int index = 1;
+    int param;
+
+    string[] names;
+
+    void appendName()
+    {
+        if (index - start == 1)
+        {
+            names ~= [cast(char)(name[start].toLower)];
+        }
+        else
+        {
+            names ~= cast(char)(name[start].toLower) ~ name[start + 1 .. index];
+        }
+
+    }
+
+    foreach (value; name[1 .. $])
+    {
+        if (isUpper(cast(dchar) value))
+        {
+            appendName();
+            start = index;
+        }
+        index++;
+    }
+    if (names.length != field.parameters.length)
+    {
+        appendName();
+    }
+
+    foreach (i, para; field.parameters)
+    {
+        para.symbol = names[i];
+    }
+}
+
 string generateAtomic(AtomicField field, bool stub)
 {
     string format;
@@ -216,6 +291,8 @@ string generateAtomic(AtomicField field, bool stub)
     bool isComplex = field.parameters.length > 1;
     bool isProperty = field.name.startsWith("set");
     string name;
+
+    autogenParameterNames(field);
 
     if (isProperty)
     {
