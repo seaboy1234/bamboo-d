@@ -296,7 +296,7 @@ string generateAtomic(AtomicField field, bool stub)
 
     if (isProperty)
     {
-        name = field.name[3 .. $];
+        name = cast(char)(field.name[3].toLower) ~ field.name[4 .. $];
         if (!stub)
         {
         if (isComplex)
@@ -325,19 +325,22 @@ string generateAtomic(AtomicField field, bool stub)
         name = field.name;
     }
     format ~= "@FieldId(" ~ field.id.to!string ~ ") ";
+    string fieldType;
     
-    if (isProperty && !stub)
+    if (isProperty)
     {
-        string fieldType;
-        if (isComplex)
+        if (isComplex && !stub)
         {
             fieldType = name ~ "_t";
         }
-        else
+        else if (!isComplex)
         {
             fieldType = generateDefinition(field.parameters[0]).split(' ')[0];
         }
+        if (!stub)
+        {
         format ~= "@FieldType!(" ~ fieldType ~ ") ";
+    }
     }
 
     foreach (keyword; field.keywords)
@@ -350,11 +353,24 @@ string generateAtomic(AtomicField field, bool stub)
         format ~= " abstract ";
     }
     format ~= " void ";
+
+    if (isComplex)
+    {
     format ~= field.symbol;
+    }
+    else
+    {
+        format ~= name;
+    }
 
     format ~= "(";
     format ~= generateParameterListFor(field);
-    format ~= ")";
+    format ~= ") ";
+
+    if (!isComplex && isProperty)
+    {
+        format ~= "@property ";
+    }
 
     string contracts;
 
@@ -367,10 +383,9 @@ string generateAtomic(AtomicField field, bool stub)
         format ~= " in {";
         format ~= contracts;
         format ~= "}";
-        if(!stub)
+        if (!stub)
         {
         format ~= "body";
-
     }
     }
 
@@ -404,6 +419,14 @@ string generateAtomic(AtomicField field, bool stub)
     else
     {
         format ~= ";";
+    }
+
+    if (!isComplex && isProperty)
+    {
+        if (stub)
+        {
+            format ~= "abstract " ~ fieldType ~ " " ~ name ~ "() inout @property;";
+        }
     }
 
     return format;
@@ -497,7 +520,14 @@ string generateMolecularCall(MolecularField field)
 string generateAtomicCall(AtomicField field)
 {
     string format;
+    if (field.parameters.length > 1)
+    {
     format ~= field.symbol;
+    }
+    else
+    {
+        format ~= "this." ~ cast(char)(field.name[3].toLower) ~ field.name[4 .. $];
+    }
     format ~= "(";
     foreach (arg; field.parameters)
     {
