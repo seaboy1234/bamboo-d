@@ -148,10 +148,7 @@ string generateClass(ClassDeclaration cls, bool generateStubs)
     {
         format ~= cls.parents[0].symbol;
     }
-    else
-    {
-        format ~= "DistributedObject";
-    }
+
 
     format ~= "{";
 
