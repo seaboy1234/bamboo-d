@@ -299,25 +299,25 @@ string generateAtomic(AtomicField field, bool stub)
         name = cast(char)(field.name[3].toLower) ~ field.name[4 .. $];
         if (!stub)
         {
-        if (isComplex)
-        {
-            format ~= "struct " ~ name ~ "_t {";
-        foreach (parameter; field.parameters)
-        {
-                format ~= generateDefinition(parameter) ~ ";";
+            if (isComplex)
+            {
+                format ~= "struct " ~ name ~ "_t {";
+                foreach (parameter; field.parameters)
+                {
+                    format ~= generateDefinition(parameter) ~ ";";
+                }
+                format ~= "}";
+                format ~= "private " ~ name ~ "_t _" ~ name ~ "; ";
             }
-            format ~= "}";
-            format ~= "private " ~ name ~ "_t _" ~ name ~ "; ";
-        }
-        else if (field.parameters.length == 1)
-        {
-            auto parameter = field.parameters[0];
-            format ~= "private " ~ generateDefinition(parameter) ~ "_" ~ name ~ ";";
-        }
-        else
-        {
-            assert(0, name ~ " is a setter with no value!");
-        }
+            else if (field.parameters.length == 1)
+            {
+                auto parameter = field.parameters[0];
+                format ~= "private " ~ generateDefinition(parameter) ~ "_" ~ name ~ ";";
+            }
+            else
+            {
+                assert(0, name ~ " is a setter with no value!");
+            }
         }
     }
     else
@@ -326,7 +326,7 @@ string generateAtomic(AtomicField field, bool stub)
     }
     format ~= "@FieldId(" ~ field.id.to!string ~ ") ";
     string fieldType;
-    
+
     if (isProperty)
     {
         if (isComplex && !stub)
@@ -339,8 +339,8 @@ string generateAtomic(AtomicField field, bool stub)
         }
         if (!stub)
         {
-        format ~= "@FieldType!(" ~ fieldType ~ ") ";
-    }
+            format ~= "@FieldType!(" ~ fieldType ~ ") ";
+        }
     }
 
     foreach (keyword; field.keywords)
@@ -356,7 +356,7 @@ string generateAtomic(AtomicField field, bool stub)
 
     if (isComplex)
     {
-    format ~= field.symbol;
+        format ~= field.symbol;
     }
     else
     {
@@ -385,36 +385,36 @@ string generateAtomic(AtomicField field, bool stub)
         format ~= "}";
         if (!stub)
         {
-        format ~= "body";
-    }
+            format ~= "body";
+        }
     }
 
     if (!stub)
     {
         format ~= "{";
-    if (isProperty)
-    {
-        if (isComplex)
-        {
-        foreach (parameter; field.parameters)
-        {
-                format ~= "_" ~ name ~ "." ~ parameter.symbol;
+        if (isProperty)
+        {   
+            if (isComplex)
+            {
+                foreach (parameter; field.parameters)
+                {
+                    format ~= "_" ~ name ~ "." ~ parameter.symbol;
+                    format ~= "=" ~ parameter.symbol ~ ";";
+                }
+            }
+            else if (field.parameters.length == 1)
+            {
+                auto parameter = field.parameters[0];
+                format ~= parameter.symbol ~ "_" ~ name;
                 format ~= "=" ~ parameter.symbol ~ ";";
             }
         }
-        else if (field.parameters.length == 1)
+        else
         {
-            auto parameter = field.parameters[0];
-            format ~= parameter.symbol ~ "_" ~ name;
-            format ~= "=" ~ parameter.symbol ~ ";";
+            format ~= `assert(0, "Override body not defined for ` ~ field.name ~ `!");`;
         }
-    }
-    else
-    {
-        format ~= `assert(0, "Override body not defined for ` ~ field.name ~ `!");`;
-    }
 
-    format ~= "}";
+        format ~= "}";
     }
     else
     {
@@ -437,7 +437,7 @@ string generateParameterField(ParameterField field, bool stub)
     string format;
     format ~= "@FieldId(" ~ field.id.to!string ~ ") ";
     format ~= "@FieldType!(" ~ generateDefinition(field.parameter).split(' ')[0] ~ ") ";
-    
+
     foreach (keyword; field.keywords)
     {
         format ~= " @" ~ keyword ~ " ";
@@ -451,7 +451,7 @@ string generateParameterField(ParameterField field, bool stub)
     }
     else
     {
-    format ~= generateDefinition(field.parameter) ~ ";";
+        format ~= generateDefinition(field.parameter) ~ ";";
     }
 
     return format;
@@ -522,7 +522,7 @@ string generateAtomicCall(AtomicField field)
     string format;
     if (field.parameters.length > 1)
     {
-    format ~= field.symbol;
+        format ~= field.symbol;
     }
     else
     {
@@ -598,7 +598,7 @@ string generateDefinition(StructParameter parameter)
 {
     enum string format = `${type} ${name}`;
 
-    string type = parameter.type.symbol;
+    string type = mapType(parameter.type.symbol);
     string name = generateName(parameter.symbol, type);
 
     parameter.symbol = name;
@@ -610,7 +610,7 @@ string generateDefinition(ArrayParameter array)
 {
     enum string format = `${type}[${maxLength}] ${name}`;
 
-    string type = array.elementType.symbol;
+    string type = mapType(array.elementType.symbol);
     string name = generateName(array.symbol, type);
     string maxLength = "";
 
@@ -674,6 +674,8 @@ string generateDefinition(SizedParameter array)
         }
     }
 
+    type = mapType(type);
+
     string name = generateName(array.symbol, type);
 
     if (array.defaultVal.length > 0)
@@ -690,12 +692,40 @@ string generateDefinition(NumericParameter numeric)
 {
     enum string format = `${type} ${name}`;
 
-    string type = numeric.type.to!string();
+    string type = mapType(numeric.type.to!string());
     string name = generateName(numeric.symbol, type);
 
     numeric.symbol = name;
 
     return mixin(interp!format);
+}
+
+string mapType(string type)
+{
+    // dfmt off
+    enum types = [
+            "int8": "byte", 
+            "int16": "short",
+            "int32": "int", 
+            "int64": "long", 
+            "uint8": "ubyte", 
+            "uint16": "ushort", 
+            "uint32": "uint", 
+            "uint64": "ulong", 
+            "float32": "float", 
+            "float64": "double", 
+            "char_": "char",
+            "varstring": "string", 
+            "blob": "ubyte[]", 
+            "varblob": "ubyte[]", 
+        ];
+    // dfmt on
+
+    if(auto ret = type in types)
+    {
+        return *ret;
+    }
+    return type;
 }
 
 string generateContractFor(Parameter parameter)
