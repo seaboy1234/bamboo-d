@@ -261,38 +261,39 @@ Module transform(ParseTree node)
 //dfmt off
 enum SyntaxType
 {
-    Module          = "DClass.Module",
-    DCFile          = "DClass.DCFile",
-    ImportDecl      = "DClass.ImportDecl",
-    ImportList      = "DClass.ImportList",
-    TypeDecl        = "DClass.TypeDecl",
-    AliasType       = "DClass.AliasType",
-    KeywordType     = "DClass.KeywordType",
-    KeywordList     = "DClass.KeywordList",
-    StructType      = "DClass.StructType",
-    ClassType       = "DClass.ClassType",
-    FieldDecl       = "DClass.FieldDecl",
-    MolecularField  = "DClass.MolecularField",
-    AtomicField     = "DClass.AtomicField",
-    ParameterField  = "DClass.ParameterField",
-    Parameter       = "DClass.Parameter",
-    ParameterList   = "DClass.ParameterList",
-    CharParameter   = "DClass.CharParameter",
-    IntParameter    = "DClass.IntParameter",
-    IntConstant     = "DClass.IntConstant",
-    IntTransform    = "DClass.IntTransform",
-    IntRange        = "DClass.IntRange",
-    FloatParameter  = "DClass.FloatParameter",
-    FloatConstant   = "DClass.FloatConstant",
-    FloatTransform  = "DClass.FloatTransform",
-    FloatRange      = "DClass.FloatRange",
-    SizedParameter  = "DClass.SizedParameter",
-    SizeConstraint  = "DClass.SizeConstraint",
-    StructParameter = "DClass.StructParameter",
-    ArrayParameter  = "DClass.ArrayParameter",
-    ArrayRange      = "DClass.ArrayRange",
-    Identifier      = "DClass.Identifier",
-    dataType        = "DClass.dataType",
+    Module              = "DClass.Module",
+    DCFile              = "DClass.DCFile",
+    ImportDecl          = "DClass.ImportDecl",
+    ImportList          = "DClass.ImportList",
+    TypeDecl            = "DClass.TypeDecl",
+    AliasType           = "DClass.AliasType",
+    KeywordType         = "DClass.KeywordType",
+    KeywordList         = "DClass.KeywordList",
+    StructType          = "DClass.StructType",
+    ClassType           = "DClass.ClassType",
+    FieldDecl           = "DClass.FieldDecl",
+    MolecularField      = "DClass.MolecularField",
+    AtomicField         = "DClass.AtomicField",
+    ParameterField      = "DClass.ParameterField",
+    Parameter           = "DClass.Parameter",
+    ParameterList       = "DClass.ParameterList",
+    CharParameter       = "DClass.CharParameter",
+    IntParameter        = "DClass.IntParameter",
+    IntConstant         = "DClass.IntConstant",
+    IntTransform        = "DClass.IntTransform",
+    IntRange            = "DClass.IntRange",
+    FloatParameter      = "DClass.FloatParameter",
+    FloatConstant       = "DClass.FloatConstant",
+    FloatTransform      = "DClass.FloatTransform",
+    FloatRange          = "DClass.FloatRange",
+    SizedParameter      = "DClass.SizedParameter",
+    SizeConstraint      = "DClass.SizeConstraint",
+    StructParameter     = "DClass.StructParameter",
+    ArrayParameter      = "DClass.ArrayParameter",
+    ArrayRange          = "DClass.ArrayRange",
+    Identifier          = "DClass.Identifier",
+    QualifiedIdentifier = "DClass.QualifiedIdentifier",
+    dataType            = "DClass.dataType",
 }
 
 enum LiteralType
@@ -383,7 +384,7 @@ string transformIdentifier(SyntaxType type = SyntaxType.Identifier)(ParseTree no
 ImportDeclaration transformImport(ParseTree node)
 {
     assert(node.name == SyntaxType.ImportDecl);
-    string module_ = transformIdentifier(node.children[0]);
+    string module_ = transformIdentifier!(SyntaxType.QualifiedIdentifier)(node.children[0]);
 
     string[] symbols = transformImportList(node.children[1]);
 

@@ -97,7 +97,8 @@ DClass:
 
     DCFile < (ImportDecl / TypeDecl / :comment)+ eoi
 
-    ImportDecl < "from" Identifier "import" ImportList
+    ImportDecl < "from" QualifiedIdentifier "import" ImportList
+    QualifiedIdentifier <~ Identifier ("." Identifier)*
     ImportList < Identifier ("/" Identifier)*
 
     TypeDecl < KeywordType / StructType / ClassType / AliasType
