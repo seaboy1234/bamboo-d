@@ -1,4 +1,5 @@
 module bamboo.astgen;
+import std.conv;
 import pegged.peg;
 import bamboo.parser;
 import bamboo.types;
@@ -16,6 +17,7 @@ Module parseString(string source)
 Module parseModule(string file)
 {
     import std.file : readText;
+
     return parseString(readText(file));
 }
 
@@ -56,6 +58,11 @@ void combineWith(Module file, Module other)
     foreach (imprt; other.importDeclarations)
     {
         file.importDeclarations ~= imprt;
+    }
+
+    foreach (keyword; other.keywords)
+    {
+        file.keywords ~= keyword;
     }
 
     file.lastTypeId = typeId;
@@ -263,6 +270,7 @@ enum SyntaxType
 {
     Module              = "DClass.Module",
     DCFile              = "DClass.DCFile",
+    ParseDirective      = "DClass.ParseDirective",
     ImportDecl          = "DClass.ImportDecl",
     ImportList          = "DClass.ImportList",
     TypeDecl            = "DClass.TypeDecl",
@@ -332,6 +340,9 @@ Module transformFile(ParseTree node)
 
     ushort id;
     ushort fieldId;
+    int skip;
+    string name;
+
     ImportDeclaration[] imports;
 
     ClassDeclaration[] classes;
@@ -339,10 +350,35 @@ Module transformFile(ParseTree node)
     KeywordDeclaration[] keywords;
     AliasDeclaration[] aliases;
 
-    foreach (child; node.children)
+    // Check if this module has a name.
+    if (node.children[0].name == SyntaxType.ParseDirective)
+    {
+        ParseTree child = node.children[0];
+        string directive = transformIdentifier(child.children[0]);
+        string value = child.children[1].matches[0];
+
+        if (directive == "module")
+        {
+            skip = 1;
+            name = value;
+        }
+    }
+
+    foreach (child; node.children[skip .. $])
     {
         switch (cast(SyntaxType) child.name) with (SyntaxType)
         {
+        case ParseDirective:
+            {
+                string directive = transformIdentifier(child.children[0]);
+                string value = child.children[1].matches[0];
+
+                if(directive == "typeid")
+                {
+                    id = value.to!ushort;
+                }
+            }
+            break;
         case ImportDecl:
             imports ~= transformImport(child);
             break;
@@ -372,7 +408,7 @@ Module transformFile(ParseTree node)
         id++;
     }
 
-    return new Module(imports, aliases, classes, structs, keywords, id, fieldId);
+    return new Module(name, imports, aliases, classes, structs, keywords, id, fieldId);
 }
 
 string transformIdentifier(SyntaxType type = SyntaxType.Identifier)(ParseTree node)
@@ -420,7 +456,7 @@ AliasDeclaration transformAliasType(ParseTree node, ref ushort id)
 KeywordDeclaration transformKeywordType(ParseTree node, ref ushort id)
 {
     assert(node.name == SyntaxType.KeywordType);
-    string symbol = transformIdentifier(node);
+    string symbol = transformIdentifier(node.children[0]);
     return new KeywordDeclaration(id, symbol);
 }
 

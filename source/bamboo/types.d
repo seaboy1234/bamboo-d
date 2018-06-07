@@ -210,6 +210,8 @@ abstract class SyntaxNode
 /// Represents a module in the dclass system.
 class Module : SyntaxNode
 {
+    /// The optional name of this module.
+    string symbol;
     /// Get the import statements in this module.
     ImportDeclaration[] importDeclarations;
 

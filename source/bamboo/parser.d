@@ -80,13 +80,9 @@ DClass:
     floatType <- ;"float64"
     sizedType <- ;"string" / ;"blob"
 
-    # Special parse directives: e.g:
-    # //# typeid = 01
-    parseDirective < "//#" Identifier "=" (!endOfLine .)* endOfLine
-
     # Comments
     comment <:  lineComment / blockComment 
-    lineComment <: ("//" !'#' (!endOfLine .)* endOfLine)
+    lineComment <: (("//" !'#') (!endOfLine .)* endOfLine)
     blockComment <: ("/*" (blockComment / (!("/*"/"*/") .))* "*/")
 
     #############
@@ -95,7 +91,11 @@ DClass:
 
     # DC File
 
-    DCFile < (ImportDecl / TypeDecl / :comment)+ eoi
+    DCFile < (ImportDecl / ParseDirective / TypeDecl / :comment)+ eoi
+
+    # Special parse directives: e.g:
+    # //# typeid = 01
+    ParseDirective < "//#" Identifier "=" (QualifiedIdentifier / numLiteral) ";"
 
     ImportDecl < "from" QualifiedIdentifier "import" ImportList
     QualifiedIdentifier <~ Identifier ("." Identifier)*
