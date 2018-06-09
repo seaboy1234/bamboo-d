@@ -1,5 +1,8 @@
 module bamboo.types;
 
+import std.algorithm;
+import std.range;
+
 import boilerplate;
 
 import bamboo.hashgen;
@@ -240,8 +243,7 @@ class Module : SyntaxNode
     TypeDeclaration[] typesById()
     {
         import std.array : array;
-        import std.algorithm : sort;
-        import std.conv;
+        import std.conv : to;
         import std.range : chain;
 
         return (to!(TypeDeclaration[])(classes)).chain(to!(TypeDeclaration[])(structs))
@@ -251,11 +253,13 @@ class Module : SyntaxNode
     /// Finds a `ClassDeclaration` or a `StructDeclaration` with the given name.
     TypeDeclaration findType(string name)
     {
-        import std.algorithm : filter;
-        import std.range : chain, takeOne;
-
         auto candidate = typesById.chain(aliases).filter!(x => x.symbol == name).takeOne.front;
         return candidate;
+    }
+
+    TypeDeclaration findType(int id)
+    {
+        return typesById.filter!(x => x.id == id).takeOne.front;
     }
 }
 
@@ -299,6 +303,21 @@ abstract class TypeDeclaration : SyntaxNode
 
     /// Gets the `Type` associated with this `TypeDeclaration`.
     abstract Type type() pure nothrow @property;
+
+    /// Gets all fields declared on this type.
+    abstract FieldDeclaration[] getFields() pure nothrow @property;
+
+    /// Find a field by its id.
+    final FieldDeclaration getField(int id)
+    {
+        return getFields.filter!(x => x.id == id).takeOne.front;
+    }
+
+    /// Find a field with its name.
+    final FieldDeclaration getField(string symbol)
+    {
+        return getFields.filter!(x => x.name == symbol).takeOne.front;
+    }
 }
 
 /// Represents a fundamental type.
@@ -319,6 +338,12 @@ class BuiltinType : TypeDeclaration
         return _type;
     }
 
+    /// Ditto.
+    override FieldDeclaration[] getFields() pure nothrow @property
+    {
+        return [];
+    }
+
     mixin(generateSyntaxNode);
 }
 
@@ -329,7 +354,7 @@ class KeywordList : SyntaxNode
     string[] keywords;
 
     alias keywords this;
-    
+
     mixin(generateSyntaxNode);
 }
 
@@ -343,6 +368,11 @@ class KeywordDeclaration : TypeDeclaration
     }
 
     mixin(generateSyntaxNode);
+
+    override FieldDeclaration[] getFields() pure nothrow @property
+    {
+        return [];
+    }
 
     /// Ditto
     override Type type() pure nothrow @property
@@ -368,6 +398,11 @@ class StructDeclaration : TypeDeclaration
     override Type type() pure nothrow @property
     {
         return Type.struct_;
+    }
+
+    override FieldDeclaration[] getFields() pure nothrow @property
+    {
+        return parameters.to!(FieldDeclaration[]);
     }
 }
 
@@ -435,18 +470,10 @@ class ClassDeclaration : TypeDeclaration
         return constructor !is null;
     }
 
-    /// Gets the field at a given index.
-    FieldDeclaration getField(size_t n) pure
+    /// Ditto.
+    override FieldDeclaration[] getFields() pure nothrow @property
     {
-        return fields[n];
-    }
-
-    /// Gets the field with the given name.
-    FieldDeclaration getField(string symbol)
-    {
-        import std.algorithm : filter;
-
-        return fields.filter!(x => x.name == symbol).front;
+        return fields;
     }
 }
 
@@ -480,6 +507,12 @@ class AliasDeclaration : TypeDeclaration
 
         return Type.invalid;
     }
+
+    /// Ditto.
+    override FieldDeclaration[] getFields() pure nothrow @property
+    {
+        return [];
+    }
 }
 
 /// Abstract class representing a field.
@@ -491,6 +524,8 @@ abstract class FieldDeclaration : SyntaxNode
 
     /// Gets the symbol name of this field.
     abstract string name() @property;
+
+    abstract string[] attributes() @property;
 }
 
 /// Represents a field which swizzles atomic fields.
@@ -512,6 +547,11 @@ class MolecularField : FieldDeclaration
     override string name() @property
     {
         return symbol;
+    }
+
+    override string[] attributes() @property
+    {
+        return [];
     }
 }
 
@@ -540,6 +580,11 @@ class AtomicField : FieldDeclaration
     {
         return symbol;
     }
+
+    override string[] attributes() @property
+    {
+        return keywords;
+    }
 }
 
 /// Represents a plain field.
@@ -556,6 +601,11 @@ class ParameterField : FieldDeclaration
     override string name() @property
     {
         return parameter.symbol;
+    }
+
+    override string[] attributes() @property
+    {
+        return keywords;
     }
 }
 
@@ -614,6 +664,7 @@ class NumericParameter : Parameter
     bool hasRange()
     {
         import std.math : isNaN;
+
         return range !is null;
     }
 
