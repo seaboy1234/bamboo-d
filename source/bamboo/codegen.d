@@ -49,6 +49,7 @@ struct TypeId
 {
     int id;
     string name;
+    int firstFieldId;
 }
 
 /// Provides metadata for D introspection on dclass fields.
@@ -154,7 +155,7 @@ private:
 string generateClass(ClassDeclaration cls, bool generateStubs)
 {
     string format;
-    format ~= "@TypeId(" ~ cls.id.to!string ~ ", `" ~ cls.symbol ~ "`) ";
+    format ~= "@TypeId(" ~ cls.id.to!string ~ ", `" ~ cls.symbol ~ "`, " ~ cls.fields[0].id.to!string ~ ") ";
 
     if (!generateStubs)
     {
@@ -189,7 +190,7 @@ string generateClass(ClassDeclaration cls, bool generateStubs)
 string generateStruct(StructDeclaration strct)
 {
     string format;
-    format ~= "@TypeId(" ~ strct.id.to!string ~ ", `" ~ strct.symbol ~ "`)";
+    format ~= "@TypeId(" ~ strct.id.to!string ~ ", `" ~ strct.symbol ~ "`, " ~ strct.parameters[0].id.to!string ~ ")";
     format ~= "struct ";
     format ~= strct.symbol;
     format ~= " {";
