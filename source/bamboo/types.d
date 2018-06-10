@@ -2,6 +2,7 @@ module bamboo.types;
 
 import std.array;
 import std.algorithm;
+import std.conv;
 import std.range;
 
 import boilerplate;
