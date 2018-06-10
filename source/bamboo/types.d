@@ -1,5 +1,6 @@
 module bamboo.types;
 
+import std.array;
 import std.algorithm;
 import std.range;
 
@@ -526,6 +527,11 @@ abstract class FieldDeclaration : SyntaxNode
     abstract string name() @property;
 
     abstract string[] attributes() @property;
+
+    final bool hasKeyword(string keyword)
+    {
+        return attributes.canFind(keyword);
+    }
 }
 
 /// Represents a field which swizzles atomic fields.
