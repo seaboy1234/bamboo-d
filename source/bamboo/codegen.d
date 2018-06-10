@@ -69,7 +69,8 @@ struct FieldType(T)
 /// This function is suitable for creating a self-contained file.
 /// See_Also: $(D generateModule).
 string generateFile(Module file, string moduleName = "",
-        string distributedObjectModule = "libastrond", bool generateStubs = true)
+        string distributedObjectModule = "libastrond", string baseType = "",
+        bool generateStubs = true)
 {
     string format;
 
@@ -104,25 +105,26 @@ string generateFile(Module file, string moduleName = "",
     }
 
     format ~= "private { mixin(Primitives); }";
-    format ~= generateModule(file, generateStubs);
+    format ~= generateModule(file, baseType, generateStubs);
 
     return format;
 }
 
 /// Ditto.
 string generateFile(string dcFile, string moduleName = "",
-        string distributedObjectModule = "libastrond", bool generateStubs = true)
+        string distributedObjectModule = "libastrond", string baseType = "",
+        bool generateStubs = true)
 {
     import bamboo.astgen : parseModule;
 
     Module file = parseModule(dcFile);
-    return generateFile(file, moduleName, distributedObjectModule, generateStubs);
+    return generateFile(file, moduleName, distributedObjectModule, baseType, generateStubs);
 }
 
 /// Generates D source code from a given module. This function is 
 /// suitable for mixing into a larger D source file.
 /// See_Also: $(D generateFile).
-string generateModule(Module file, bool generateStubs = true)
+string generateModule(Module file, string baseType = "", bool generateStubs = true)
 {
     string format;
 
@@ -130,7 +132,7 @@ string generateModule(Module file, bool generateStubs = true)
     {
         if (auto cls = cast(ClassDeclaration) type)
         {
-            format ~= generateClass(cls, generateStubs);
+            format ~= generateClass(cls, baseType, generateStubs);
         }
         else if (auto strct = cast(StructDeclaration) type)
         {
@@ -142,20 +144,21 @@ string generateModule(Module file, bool generateStubs = true)
 }
 
 /// Ditto.
-string generateModule(string dcFile, bool generateStubs = true)
+string generateModule(string dcFile, string baseType = "", bool generateStubs = true)
 {
     import bamboo.astgen : parseModule;
 
     Module file = parseModule(dcFile);
-    return generateModule(file, generateStubs);
+    return generateModule(file, baseType, generateStubs);
 }
 
 private:
 
-string generateClass(ClassDeclaration cls, bool generateStubs)
+string generateClass(ClassDeclaration cls, string baseType, bool generateStubs)
 {
     string format;
-    format ~= "@TypeId(" ~ cls.id.to!string ~ ", `" ~ cls.symbol ~ "`, " ~ cls.fields[0].id.to!string ~ ") ";
+    format ~= "@TypeId(" ~ cls.id.to!string ~ ", `" ~ cls.symbol ~ "`, "
+        ~ cls.fields[0].id.to!string ~ ") ";
 
     if (!generateStubs)
     {
@@ -169,6 +172,11 @@ string generateClass(ClassDeclaration cls, bool generateStubs)
     {
         format ~= " : ";
         format ~= cls.parents[0].symbol;
+    }
+    else if (baseType.length > 0)
+    {
+        format ~= " : ";
+        format ~= baseType;
     }
 
     format ~= "{";
@@ -190,7 +198,8 @@ string generateClass(ClassDeclaration cls, bool generateStubs)
 string generateStruct(StructDeclaration strct)
 {
     string format;
-    format ~= "@TypeId(" ~ strct.id.to!string ~ ", `" ~ strct.symbol ~ "`, " ~ strct.parameters[0].id.to!string ~ ")";
+    format ~= "@TypeId(" ~ strct.id.to!string ~ ", `" ~ strct.symbol ~ "`, "
+        ~ strct.parameters[0].id.to!string ~ ")";
     format ~= "struct ";
     format ~= strct.symbol;
     format ~= " {";
