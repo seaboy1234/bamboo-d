@@ -474,6 +474,8 @@ string generateAtomic(AtomicField field, bool stub)
 
     if (isProperty)
     {
+        format ~= "@FieldId(" ~ field.id.to!string ~ ") ";
+
         if (!isComplex)
         {
             if (!stub)
@@ -526,6 +528,9 @@ string generateParameterField(ParameterField field, bool stub)
         format ~= "void " ~ name ~ "(" ~ type ~ " value) @property {";
         format ~= "_" ~ name ~ " = value;";
         format ~= "}";
+
+        format ~= "@FieldId(" ~ field.id.to!string ~ ") ";
+
         format ~= type ~ " " ~ name ~ "() inout @property {";
         format ~= "return _" ~ name ~ ";";
         format ~= "}";
