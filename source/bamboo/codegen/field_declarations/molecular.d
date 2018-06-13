@@ -1,6 +1,31 @@
-module bamboo.codegen.calls;
+module bamboo.codegen.field_declarations.molecular;
 
-import bamboo.codegen;
+import bamboo.codegen.field_declarations;
+
+string generateMolecular(MolecularField field)
+{
+    string format;
+    format ~= "@FieldId(" ~ field.id.to!string ~ ")";
+    format ~= "void ";
+    format ~= field.symbol;
+
+    format ~= "(";
+
+    foreach (reference; field.references)
+    {
+        format ~= generateParameterListFor(reference);
+    }
+
+    format ~= ") {";
+    foreach (reference; field.references)
+    {
+        format ~= generateCallFor(reference) ~ ";";
+    }
+
+    format ~= "}";
+
+    return format;
+}
 
 string generateCallFor(FieldDeclaration field)
 {
