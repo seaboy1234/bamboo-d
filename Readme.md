@@ -8,6 +8,7 @@ This project aims to provide a D interface to the DClass specification, used wit
 * Complete parser for `.dc` files.
 * DOM representation.
 * Hashing compatibility with Astron through `legacy_hash`.
+* D Code generation through mixins.
 
 ## Planned Features
-* D Code generation through mixins.
+* Stable public API.
