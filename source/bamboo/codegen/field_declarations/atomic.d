@@ -191,7 +191,7 @@ string generateAtomic(AtomicField field, bool stub)
         {
             if (stub)
             {
-                format ~= "auto " ~ name ~ "() inout @property {";
+                format ~= "auto " ~ name ~ "() {";
                 format ~= "return _" ~ name ~ ";";
                 format ~= "}";
             }
