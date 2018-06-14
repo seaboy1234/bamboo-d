@@ -97,7 +97,10 @@ string generateAtomic(AtomicField field, bool stub)
         format ~= generateParameterListFor(field);
         format ~= ") ";
 
-        format ~= "@property ";
+        if (!isComplex && isProperty)
+        {
+            format ~= "@property ";
+        }
 
         return format;
     }
