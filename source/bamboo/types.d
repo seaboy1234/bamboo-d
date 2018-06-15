@@ -255,13 +255,22 @@ class Module : SyntaxNode
     /// Finds a `ClassDeclaration` or a `StructDeclaration` with the given name.
     TypeDeclaration findType(string name)
     {
-        auto candidate = typesById.chain(aliases).filter!(x => x.symbol == name).takeOne.front;
-        return candidate;
+        auto candidate = typesById.chain(aliases).filter!(x => x.symbol == name).takeOne;
+        if (candidate.empty)
+        {
+            return null;
+        }
+        return candidate.front;
     }
 
     TypeDeclaration findType(int id)
     {
-        return typesById.filter!(x => x.id == id).takeOne.front;
+        auto candidate = typesById.chain(aliases).filter!(x => x.id == id).takeOne;
+        if (candidate.empty)
+        {
+            return null;
+        }
+        return candidate.front;
     }
 }
 
