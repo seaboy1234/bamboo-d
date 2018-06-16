@@ -444,7 +444,7 @@ string[] transformImportList(ParseTree node)
     return symbols;
 }
 
-AliasDeclaration transformAliasType(ParseTree node, ref ushort id)
+AliasDeclaration transformAliasType(ParseTree node, ushort id)
 {
     assert(node.name == SyntaxType.AliasType);
     string symbol = transformIdentifier(node.children[1]);
@@ -453,7 +453,7 @@ AliasDeclaration transformAliasType(ParseTree node, ref ushort id)
     return new AliasDeclaration(id, symbol, type);
 }
 
-KeywordDeclaration transformKeywordType(ParseTree node, ref ushort id)
+KeywordDeclaration transformKeywordType(ParseTree node, ushort id)
 {
     assert(node.name == SyntaxType.KeywordType);
     string symbol = transformIdentifier(node.children[0]);
@@ -474,7 +474,7 @@ KeywordList transformKeywordList(ParseTree node)
     return new KeywordList(symbols);
 }
 
-StructDeclaration transformStructType(ParseTree node, ref ushort id, ref ushort fieldId)
+StructDeclaration transformStructType(ParseTree node, ushort id, ref ushort fieldId)
 {
     assert(node.name == SyntaxType.StructType);
 
@@ -490,7 +490,7 @@ StructDeclaration transformStructType(ParseTree node, ref ushort id, ref ushort 
     return new StructDeclaration(id, symbol, members);
 }
 
-ClassDeclaration transformClassType(ParseTree node, ref ushort id, ref ushort fieldId)
+ClassDeclaration transformClassType(ParseTree node, ushort id, ref ushort fieldId)
 {
     assert(node.name == SyntaxType.ClassType);
 
