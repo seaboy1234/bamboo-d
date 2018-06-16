@@ -387,16 +387,16 @@ Module transformFile(ParseTree node)
             switch (cast(SyntaxType) child.name) with (SyntaxType)
             {
             case KeywordType:
-                keywords ~= transformKeywordType(child, id);
+                keywords ~= transformKeywordType(child, 0);
                 break;
             case StructType:
-                structs ~= transformStructType(child, id, fieldId);
+                structs ~= transformStructType(child, id++, fieldId);
                 break;
             case ClassType:
-                classes ~= transformClassType(child, id, fieldId);
+                classes ~= transformClassType(child, id++, fieldId);
                 break;
             case AliasType:
-                aliases ~= transformAliasType(child, id);
+                aliases ~= transformAliasType(child, 0);
                 break;
             default:
                 assert(0);
@@ -405,7 +405,6 @@ Module transformFile(ParseTree node)
         default:
             assert(0, "Expected ImportDecl or TypeDecl. Got " ~ child.name);
         }
-        id++;
     }
 
     return new Module(name, imports, aliases, classes, structs, keywords, id, fieldId);
