@@ -299,6 +299,8 @@ enum SyntaxType
     StructParameter     = "DClass.StructParameter",
     ArrayParameter      = "DClass.ArrayParameter",
     ArrayRange          = "DClass.ArrayRange",
+    InterfaceMarker     = "DClass.InterfaceMarker",
+    IdentifierList      = "DClass.IdentifierList",
     Identifier          = "DClass.Identifier",
     QualifiedIdentifier = "DClass.QualifiedIdentifier",
     dataType            = "DClass.dataType",
@@ -373,7 +375,7 @@ Module transformFile(ParseTree node)
                 string directive = transformIdentifier(child.children[0]);
                 string value = child.children[1].matches[0];
 
-                if(directive == "typeid")
+                if (directive == "typeid")
                 {
                     id = value.to!ushort;
                 }
@@ -493,13 +495,25 @@ ClassDeclaration transformClassType(ParseTree node, ushort id, ref ushort fieldI
 {
     assert(node.name == SyntaxType.ClassType);
 
-    string symbol = transformIdentifier(node.children[0]);
-    string superclass;
-    int cur = 1;
+    int cur = 0;
+    bool isInterface;
 
-    if (node.children[cur].name == SyntaxType.Identifier)
+    if (node.children[cur].name == SyntaxType.InterfaceMarker)
     {
-        superclass = transformIdentifier(node.children[cur++]);
+        cur++;
+        isInterface = true;
+    }
+
+    string symbol = transformIdentifier(node.children[cur++]);
+    string[] superclasses;
+
+    if (node.children[cur].name == SyntaxType.IdentifierList)
+    {
+        foreach (child; node.children[cur].children)
+        {
+            superclasses ~= transformIdentifier(child);
+        }
+        cur++;
     }
 
     FieldDeclaration[] members;
@@ -518,7 +532,7 @@ ClassDeclaration transformClassType(ParseTree node, ushort id, ref ushort fieldI
         }
     }
 
-    return new ClassDeclaration(id, symbol, superclass, cotr, members);
+    return new ClassDeclaration(id, symbol, superclasses, isInterface, cotr, members);
 }
 
 FieldDeclaration transformFieldDecl(ParseTree node, ushort id)

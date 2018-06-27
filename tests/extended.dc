@@ -1,0 +1,58 @@
+// This file demonstrates multiple inheritance by the way of interfaces.
+//
+// If a dclass will be used for multiple inheritance, it must be annotated
+// with a `//@interface` directive. This instructs the code generator to
+// generate an interface instead of a regular class.
+
+// Import the views for this example.
+from extended import DistributedPlayer/AI/OV
+
+typedef uint32 doId;
+
+// Represents a named object.
+//@interface
+dclass DistributedNamedNode {
+    string name broadcast required;
+};
+
+// Represents an object with X, Y, and Z positions.
+//@interface
+dclass DistributedSpacialNode {
+    float32 x broadcast required;
+    float32 y broadcast required;
+    float32 z broadcast required;
+
+    setXY : x, y;
+    setPos : setXY, z;
+};
+
+// Represents an object with physics-based movement.
+//@interface
+dclass DistributedPhysicsNode : DistributedSpacialNode {
+    float32 velocityX broadcast required;
+    float32 velocityY broadcast required;
+    float32 velocityZ broadcast required;
+
+    float32 accelerationX broadcast required;
+    float32 accelerationY broadcast required;
+    float32 accelerationZ broadcast required;
+
+    setVelocity : velocityX, velocityY, velocityZ;
+    setAcceleration : accelerationX, accelerationY, accelerationZ;
+
+    setPosVelocityAcceleration : setPos, setVelocity, setAcceleration;
+
+    accelerate(float32 x, float32 y, float32 z) ownsend airecv;
+};
+
+// Represents an object with chat capibilities.
+//@interface
+dclass DistributedChatParticipent {
+    setChat(string message) ownsend broadcast;
+
+    sendPrivateMessage(doId sender, string message) clsend ownrecv;
+};
+
+dclass DistributedPlayer : DistributedNamedNode, DistributedPhysicsNode, DistributedChatParticipent {
+    
+};

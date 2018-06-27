@@ -425,11 +425,15 @@ class ClassDeclaration : TypeDeclaration
         return TypeDeclaration.Kind.classDeclaration;
     }
 
-    /// The superclass for this type.
+    /// The superclasses for this type.
     @(This.Exclude)
-    ClassDeclaration superclass;
+    ClassDeclaration[] superclasses;
 
-    string superclassName;
+    string[] superclassNames;
+
+    /// Whether this $(D ClassDeclaration) should be generated as an
+    /// `interface`.
+    bool isInterface;
 
     /// The constructor for this type.
     FieldDeclaration constructor;
@@ -450,29 +454,23 @@ class ClassDeclaration : TypeDeclaration
     {
         if (hasSuperclass())
         {
-            superclass = cast(ClassDeclaration) file.findType(superclassName);
+            foreach (superclass; superclassNames)
+            {
+                superclasses ~= cast(ClassDeclaration) file.findType(superclass);
+            }
         }
     }
 
     /// Checks whether this ClassDeclaration has a super class.
     bool hasSuperclass() pure inout @nogc @property
     {
-        return superclassName.length > 0;
+        return superclassNames.length > 0;
     }
 
-    /// Get the chain of parents.  The closest parent is first.
+    /// Get the direct parents of this dclass.
     ClassDeclaration[] parents() pure @property
     {
-        auto current = superclass;
-
-        ClassDeclaration[] parents;
-        while (current !is null)
-        {
-            parents ~= current;
-            current = current.superclass;
-        }
-
-        return parents;
+        return superclasses;
     }
 
     /// Gets whether this class has a constructor.

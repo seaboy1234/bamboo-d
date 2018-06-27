@@ -108,7 +108,11 @@ DClass:
     StructType < "struct" Identifier "{" (Parameter ";")+ "}"
 
     # Class Type
-    ClassType < "dclass" Identifier (":" Identifier)? "{" (FieldDecl ";")+ "}"
+    ClassType < InterfaceMarker? "dclass" Identifier (":" IdentifierList)? "{" (FieldDecl ";")+ "}"
+
+    InterfaceMarker < "//@interface"
+
+    IdentifierList < Identifier ("," Identifier)*
 
     # Field Types
     FieldDecl < (MolecularField / AtomicField / ParameterField)
