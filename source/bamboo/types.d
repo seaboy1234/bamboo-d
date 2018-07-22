@@ -25,6 +25,14 @@ private
     enum string generateSyntaxNode = `
         mixin(GenerateThis);
         mixin(generateVisit);
+
+        static if(is(typeof(symbol)))
+        {
+            override string toString()
+            {
+                return typeid(this).name ~ " " ~ symbol;
+            }
+        }
         `;
 }
 
@@ -631,6 +639,7 @@ class Parameter : SyntaxNode
 
     /// Get the fundamental type of this parameter.
     abstract Type parameterType() @property;
+    abstract string parameterTypeName() @property;
 
     mixin(GenerateThis);
 }
@@ -811,6 +820,11 @@ class NumericParameter : Parameter
             assert(0, "Invalid type " ~ type);
         }
     }
+
+    override string parameterTypeName() @property
+    {
+        return type;
+}
 }
 
 /// Represents the minimum and maximum value of a NumericParameter.
@@ -914,6 +928,11 @@ class SizedParameter : Parameter
         }
         assert(0);
     }
+
+    override string parameterTypeName() @property
+    {
+        return type;
+}
 }
 
 /// Represents the constraints on a SizedParameter.
@@ -953,6 +972,10 @@ class StructParameter : Parameter
         return type.type;
     }
 
+    override string parameterTypeName() @property
+    {
+        return typeName;
+    }
 }
 
 class ArrayParameter : Parameter
@@ -962,6 +985,9 @@ class ArrayParameter : Parameter
 
     @(This.Exclude)
     TypeDeclaration elementType;
+
+    @(This.Exclude)
+    Parameter element;
 
     mixin(generateSyntaxNode);
 
@@ -988,6 +1014,11 @@ class ArrayParameter : Parameter
         {
             return Type.vararray;
         }
+    }
+
+    override string parameterTypeName() @property
+    {
+        return type;
     }
 
 }

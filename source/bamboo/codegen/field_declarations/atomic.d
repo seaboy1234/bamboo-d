@@ -215,7 +215,7 @@ string generateAtomic(AtomicField field, bool stub)
 
     name = getFieldName();
 
-    if (stub)
+    if (stub && isProperty)
     {
         generated ~= generateUnderlyingAtomicField();
     }
@@ -251,6 +251,12 @@ void autogenParameterNames(AtomicField field)
     if (!field.symbol.startsWith("set"))
     {
         return;
+    }
+
+    if (field.parameters.length == 1)
+    {
+        string name = field.symbol[3 .. $];
+        field.parameters[0].symbol = cast(char) name[0].toLower ~ name[1 .. $];
     }
 
     foreach (parameter; field.parameters)

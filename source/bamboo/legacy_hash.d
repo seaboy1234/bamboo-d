@@ -281,7 +281,7 @@ void hashLegacyType(T)(ref HashGenerator gen, T thing)
     case array:
     case vararray:
         auto array = cast(ArrayParameter) thing;
-        hashLegacyType(gen, array.elementType);
+        hashLegacyType(gen, array.element);
 
         if (array.hasRange)
         {
