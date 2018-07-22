@@ -11,6 +11,14 @@ string generateAtomic(AtomicField field, bool stub)
     bool isProperty = field.name.startsWith("set");
     string name;
 
+    int counter = field.id;
+
+    foreach (parameter; field.parameters)
+    {
+        counter++;
+        parameter.symbol = generateName(parameter.symbol, parameter.parameterTypeName, counter);
+    }
+
     string generateUnderlyingAtomicField()
     {
         string format;

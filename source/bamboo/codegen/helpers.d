@@ -24,7 +24,7 @@ string generateDefinition(StructParameter parameter)
     enum string format = `${type} ${name}`;
 
     string type = mapType(parameter.type.symbol);
-    string name = generateName(parameter.symbol, type);
+    string name = generateName(parameter.symbol, type, 1);
 
     parameter.symbol = name;
 
@@ -36,7 +36,7 @@ string generateDefinition(ArrayParameter array)
     enum string format = `${type}[${maxLength}] ${name}`;
 
     string type = mapType(array.elementType.symbol);
-    string name = generateName(array.symbol, type);
+    string name = generateName(array.symbol, type, 2);
     string maxLength = "";
 
     version (RespectFixedLength)
@@ -101,7 +101,7 @@ string generateDefinition(SizedParameter array)
 
     type = mapType(type);
 
-    string name = generateName(array.symbol, type);
+    string name = generateName(array.symbol, type, 3);
 
     if (array.defaultVal.length > 0)
     {
@@ -118,7 +118,7 @@ string generateDefinition(NumericParameter numeric)
     enum string format = `${type} ${name}`;
 
     string type = mapType(numeric.type.to!string());
-    string name = generateName(numeric.symbol, type);
+    string name = generateName(numeric.symbol, type, 4);
 
     numeric.symbol = name;
 
@@ -238,18 +238,11 @@ string generateContract(NumericParameter numeric)
     return format;
 }
 
-private:
-
-static int g_nameCounter;
-
-string generateName(string name, string type)
+string generateName(string name, string type, int counter)
 {
     if (name.length == 0)
     {
-        HashGenerator gen;
-        gen.addInt(g_nameCounter++);
-        gen.addString(type);
-        name = mixin(interp!"_${type.toLower}${gen.hash}");
+        name = mixin(interp!"_${type.toLower}${counter}");
     }
     return name;
 }
