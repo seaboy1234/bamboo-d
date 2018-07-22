@@ -25,13 +25,16 @@ string generateAtomic(AtomicField field, bool stub)
 
         if (isComplex)
         {
-            format ~= "struct " ~ name ~ "_t {";
+            format ~= "private Tuple!(";
             foreach (parameter; field.parameters)
             {
-                format ~= generateDefinition(parameter) ~ ";";
+                string[] parts = generateDefinition(parameter).split(' ');
+                string type = parts[0];
+                string param = parts[1];
+
+                format ~= type ~ "," ~ "`" ~ param ~"`,";
             }
-            format ~= "}";
-            format ~= "private " ~ name ~ "_t _" ~ name ~ "; ";
+            format ~= ") _" ~ name ~ "; ";
         }
         else if (field.parameters.length == 1)
         {
@@ -76,7 +79,7 @@ string generateAtomic(AtomicField field, bool stub)
         {
             if (isComplex && stub)
             {
-                fieldType = name ~ "_t";
+                fieldType = "typeof(_" ~ name ~ ")";
             }
             else if (!isComplex)
             {

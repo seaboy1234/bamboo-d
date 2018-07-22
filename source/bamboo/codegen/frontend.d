@@ -66,6 +66,8 @@ string generateModule(Module file, string baseType = "", bool generateStubs = tr
 {
     string format;
 
+    format ~= "import std.typecons;";
+
     foreach (type; file.typesById)
     {
         if (auto cls = cast(ClassDeclaration) type)
