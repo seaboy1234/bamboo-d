@@ -108,7 +108,7 @@ DClass:
     StructType < "struct" Identifier "{" (Parameter ";")+ "}"
 
     # Class Type
-    ClassType < InterfaceMarker? "dclass" Identifier (":" IdentifierList)? "{" (FieldDecl ";")+ "}"
+    ClassType < InterfaceMarker? "dclass" Identifier (":" IdentifierList)? "{" (FieldDecl ";")* "}"
 
     InterfaceMarker < "//@interface"
 

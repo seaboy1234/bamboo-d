@@ -125,6 +125,10 @@ class SyntaxResolver : Visitor
         case string_:
         case blob:
             return new SizedParameter(name, type.type.to!string, new SizeConstraint(0, 0), "");
+        case struct_:
+            return new StructParameter(name, type.symbol);
+        case array:
+            return new ArrayParameter(name, type.type.to!string, new ArrayRange(0, 0));
         default:
             break;
         }
@@ -216,6 +220,21 @@ class SyntaxResolver : Visitor
     override void visit(ParameterField node)
     {
         node.parameter.visit(this);
+        if (StructParameter strct = cast(StructParameter) node.parameter)
+        {
+            import std.algorithm : canFind;
+
+            auto numerics = [
+                Type.int8, Type.int16, Type.int32, Type.int64, Type.uint8,
+                Type.uint16, Type.uint32, Type.uint64, Type.char_, Type.float32, Type.float64
+            ];
+
+            if (numerics.canFind(strct.parameterType))
+            {
+                node.parameter = createParameter(strct.type, strct.symbol);
+                node.visit(this);
+    }
+        }
     }
 
     override void visit(NumericParameter node)
@@ -250,6 +269,8 @@ class SyntaxResolver : Visitor
     override void visit(ArrayParameter node)
     {
         node.elementType = resolve(node.type);
+        node.element = createParameter(node.elementType, "");
+        node.element.visit(this);
     }
 
     override void visit(ArrayRange node)
@@ -299,8 +320,6 @@ enum SyntaxType
     StructParameter     = "DClass.StructParameter",
     ArrayParameter      = "DClass.ArrayParameter",
     ArrayRange          = "DClass.ArrayRange",
-    InterfaceMarker     = "DClass.InterfaceMarker",
-    IdentifierList      = "DClass.IdentifierList",
     Identifier          = "DClass.Identifier",
     QualifiedIdentifier = "DClass.QualifiedIdentifier",
     dataType            = "DClass.dataType",
@@ -449,7 +468,7 @@ AliasDeclaration transformAliasType(ParseTree node, ushort id)
 {
     assert(node.name == SyntaxType.AliasType);
     string symbol = transformIdentifier(node.children[1]);
-    string type = transformIdentifier!(SyntaxType.dataType)(node.children[0]);
+    string type = node.children[0].matches[0];
 
     return new AliasDeclaration(id, symbol, type);
 }
@@ -516,7 +535,7 @@ ClassDeclaration transformClassType(ParseTree node, ushort id, ref ushort fieldI
         cur++;
     }
 
-    FieldDeclaration[] members;
+    FieldDeclaration[] members = [];
     FieldDeclaration cotr;
 
     foreach (child; node.children[cur .. $])

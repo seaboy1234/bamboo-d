@@ -5,8 +5,12 @@ import bamboo.codegen;
 string generateClass(ClassDeclaration cls, string baseType, bool generateStubs)
 {
     string format;
-    format ~= "@TypeId(" ~ cls.id.to!string ~ ", `" ~ cls.symbol ~ "`, "
-        ~ cls.fields[0].id.to!string ~ ") ";
+    string firstFieldId = "0";
+    if (cls.fields)
+    {
+        firstFieldId = cls.fields[0].id.to!string;
+    }
+    format ~= "@TypeId(" ~ cls.id.to!string ~ ", `" ~ cls.symbol ~ "`, " ~ firstFieldId ~ ") ";
 
     if (!generateStubs)
     {
@@ -58,4 +62,3 @@ string generateStruct(StructDeclaration strct)
     format ~= "}";
     return format;
 }
-
