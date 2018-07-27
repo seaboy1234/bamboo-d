@@ -29,8 +29,8 @@ string generateParameterField(ParameterField field, bool stub)
 
     if (!stub)
     {
-        return parameterFieldAbstract.format(name, type, field.id, field.keywords.keywords);
+        return parameterFieldAbstract.format(name, type, field.id, field.keywords);
     }
-    
-    return parameterFieldStubbed.format(name, type, field.id, field.keywords.keywords);
+
+    return parameterFieldStubbed.format(name, type, field.id, field.keywords);
 }
