@@ -25,7 +25,7 @@ string generateClass(ClassDeclaration cls, string baseType, bool generateStubs)
         format ~= " : ";
         format ~= cls.parents[0].symbol;
     }
-    else if (baseType.length > 0)
+    else if (baseType.length > 0 && cls.symbol != baseType)
     {
         format ~= " : ";
         format ~= baseType;
