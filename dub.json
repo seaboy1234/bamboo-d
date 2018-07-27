@@ -4,7 +4,7 @@
 		"Christian Wilson"
 	],
 	"dependencies": {
-		"boilerplate": "~>0.0.21",
+		"boilerplate": "~>1.1.2",
 		"pegged": "~>0.4.3"
 	},
 	"description": "An implementation of the Bamboo/DClass format for the D Programming Language.",
