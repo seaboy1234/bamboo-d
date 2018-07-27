@@ -238,7 +238,7 @@ class SyntaxResolver : Visitor
             {
                 node.parameter = createParameter(strct.type, strct.symbol);
                 node.visit(this);
-    }
+            }
         }
     }
 
@@ -524,7 +524,7 @@ ClassDeclaration transformClassType(ParseTree node, ushort id, ref ushort fieldI
     int cur = 0;
     bool isInterface;
 
-    if (node.children[cur].name == SyntaxType.InterfaceMarker)
+    if (node.child(cur).name == SyntaxType.InterfaceMarker)
     {
         cur++;
         isInterface = true;
@@ -533,7 +533,7 @@ ClassDeclaration transformClassType(ParseTree node, ushort id, ref ushort fieldI
     string symbol = transformIdentifier(node.children[cur++]);
     string[] superclasses;
 
-    if (node.children[cur].name == SyntaxType.IdentifierList)
+    if (node.child(cur).name == SyntaxType.IdentifierList)
     {
         foreach (child; node.children[cur].children)
         {
@@ -545,16 +545,19 @@ ClassDeclaration transformClassType(ParseTree node, ushort id, ref ushort fieldI
     FieldDeclaration[] members = [];
     FieldDeclaration cotr;
 
-    foreach (child; node.children[cur .. $])
+    if (cur < node.children.length - 1)
     {
-        auto field = transformFieldDecl(child, fieldId++);
-        if (is(field == AtomicField))
+        foreach (child; node.children[cur .. $])
         {
-            cotr = field;
-        }
-        else
-        {
-            members ~= field;
+            auto field = transformFieldDecl(child, fieldId++);
+            if (is(field == AtomicField))
+            {
+                cotr = field;
+            }
+            else
+            {
+                members ~= field;
+            }
         }
     }
 
