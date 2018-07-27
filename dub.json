@@ -13,5 +13,23 @@
 	"targetPath": "build",
 	"versions": [
 		"broken_parents"
+	],
+	"configurations": [
+		{
+			"name": "application",
+			"versions": [
+				"application"
+			],
+			"targetType": "executable",
+			"targetName": "bamboo"
+		},
+		{
+			"name": "library",
+			"versions": [
+				"library"
+			],
+			"targetType": "library",
+			"targetName": "bamboo"
+		}
 	]
 }

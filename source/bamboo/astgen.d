@@ -12,6 +12,11 @@ Module parseString(string source)
     return completed;
 }
 
+package Module transformParseTree(ParseTree tree)
+{
+    return transform(tree);
+}
+
 /// Given a path, parses a DC file.
 /// Returns: a `Module`, representing the parsed file.
 Module parseModule(string file)
