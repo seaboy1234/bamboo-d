@@ -1,6 +1,7 @@
 import std.algorithm;
 import std.file;
 import std.getopt;
+import std.path;
 import std.stdio;
 
 import bamboo.astgen;
@@ -27,8 +28,7 @@ version (application)
         string name;
 
         //dfmt off
-        auto helpInformation = getopt(args, 
-            "file|f", "The file(s) to transpile.", &files,
+        auto helpInformation = getopt(args, config.passThrough,
             "output|o", "The file to output.", &output,
             "module|m", "The name of the module to generate.", &name,
             "import|i", "Modules to import.", &imports,
@@ -39,9 +39,10 @@ version (application)
         );
         // dfmt on
 
-        if(!args.length)
+        files = args[1 .. $];
+        if (!output.length && files.length == 1)
         {
-            helpInformation.helpWanted = true;
+            output = text(stripExtension(files[0]), ".d");
         }
 
         if (!helpInformation.helpWanted)
@@ -61,20 +62,21 @@ version (application)
 
         if (helpInformation.helpWanted)
         {
+            writeln("Usage: bamboo [options] [files]");
             defaultGetoptPrinter("Transpiler for Astron dc files.", helpInformation.options);
             return;
         }
 
-        string source = joiner(files.map!(x => x.readText()), lineSep.to!string).to!string;
+        string source = joiner(files.map!(x => x.readText())).to!string;
 
         ParseTree tree = DClass(source);
 
-        if(saveParseTree)
+        if (saveParseTree)
         {
             toHTML(tree, parseTreeOutput);
         }
 
-        if(!tree.successful)
+        if (!tree.successful)
         {
             writeln("Files did not parse correctly.");
         }
