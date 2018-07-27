@@ -8,3 +8,4 @@ build/*
 *.bak
 dub.selections.json
 .vscode/*
+tests/*.d
