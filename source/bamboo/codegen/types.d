@@ -46,9 +46,3 @@ struct FieldId
 {
     int id;
 }
-
-/// Provides metadata for D introspection on dclass fields.
-struct FieldType(T)
-{
-    T typeInit = T.init;
-}

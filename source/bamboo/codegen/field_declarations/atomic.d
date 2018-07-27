@@ -85,10 +85,6 @@ string generateAtomic(AtomicField field, bool stub)
             {
                 fieldType = generateDefinition(field.parameters[0]).split(' ')[0];
             }
-            if (stub)
-            {
-                format ~= "@FieldType!(" ~ fieldType ~ ") ";
-            }
         }
 
         foreach (keyword; field.keywords)
