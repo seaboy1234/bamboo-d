@@ -320,8 +320,10 @@ enum SyntaxType
     StructParameter     = "DClass.StructParameter",
     ArrayParameter      = "DClass.ArrayParameter",
     ArrayRange          = "DClass.ArrayRange",
+    InterfaceMarker     = "DClass.InterfaceMarker",
     Identifier          = "DClass.Identifier",
     QualifiedIdentifier = "DClass.QualifiedIdentifier",
+    IdentifierList      = "DClass.IdentifierList",
     dataType            = "DClass.dataType",
 }
 
