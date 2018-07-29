@@ -12,7 +12,7 @@ import bamboo.util;
 
 private
 {
-    enum string generateVisit = `
+    enum string generateVisit = q{
         override SyntaxKind syntaxKind() @property
         {
             return mixin("SyntaxKind." ~ (typeof(this).stringof));
@@ -20,9 +20,10 @@ private
         override void visit(Visitor visitor)
         {
             visitor.visit(this);
-        }`;
+        }
+    };
 
-    enum string generateSyntaxNode = `
+    enum string generateSyntaxNode = q{
         mixin(GenerateThis);
         mixin(generateVisit);
 
@@ -33,7 +34,7 @@ private
                 return typeid(this).name ~ " " ~ symbol;
             }
         }
-        `;
+    };
 }
 
 /// Represents the type of a SyntaxNode.
