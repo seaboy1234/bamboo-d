@@ -251,18 +251,24 @@ class Module : SyntaxNode
 
     /// Gets an array of `StructDeclaration` and `ClassDeclaration` objects
     /// sorted by their id.
-    TypeDeclaration[] typesById()
+    TypeDeclaration[] typesById() pure @safe nothrow
     {
         import std.array : array;
         import std.conv : to;
         import std.range : chain;
 
-        return (to!(TypeDeclaration[])(classes)).chain(to!(TypeDeclaration[])(structs))
-            .sort!("a.id < b.id").array;
+        // dfmt off
+        auto result = chain(classes, structs)
+                      .array // BAD: for some reason, we need this call to `array`...
+                      .sort!"a.id < b.id"
+                      .array;
+        // dfmt on
+
+        return result;
     }
 
     /// Finds a `ClassDeclaration` or a `StructDeclaration` with the given name.
-    TypeDeclaration findType(string name)
+    TypeDeclaration findType(in string name) pure @safe nothrow
     {
         auto candidate = typesById.chain(aliases).filter!(x => x.symbol == name).takeOne;
         if (candidate.empty)
@@ -272,7 +278,7 @@ class Module : SyntaxNode
         return candidate.front;
     }
 
-    TypeDeclaration findType(int id)
+    TypeDeclaration findType(in int id) pure @safe nothrow
     {
         auto candidate = typesById.chain(aliases).filter!(x => x.id == id).takeOne;
         if (candidate.empty)
@@ -322,10 +328,10 @@ abstract class TypeDeclaration : SyntaxNode
     mixin(GenerateThis);
 
     /// Gets the `Type` associated with this `TypeDeclaration`.
-    abstract Type type() pure nothrow @property;
+    abstract inout(Type) type() inout @safe pure nothrow @property;
 
     /// Gets all fields declared on this type.
-    abstract FieldDeclaration[] getFields() pure nothrow @property;
+    abstract inout(FieldDeclaration[]) getFields() inout @safe pure nothrow @property;
 
     /// Find a field by its id.
     final FieldDeclaration getField(int id)
@@ -353,13 +359,13 @@ class BuiltinType : TypeDeclaration
     }
 
     /// Ditto
-    override Type type() pure nothrow @property
+    override inout(Type) type() inout @safe pure nothrow @property
     {
         return _type;
     }
 
     /// Ditto.
-    override FieldDeclaration[] getFields() pure nothrow @property
+    override inout(FieldDeclaration[]) getFields() inout @safe pure nothrow @property
     {
         return [];
     }
@@ -389,13 +395,13 @@ class KeywordDeclaration : TypeDeclaration
 
     mixin(generateSyntaxNode);
 
-    override FieldDeclaration[] getFields() pure nothrow @property
+    override inout(FieldDeclaration[]) getFields() inout @safe pure nothrow @property
     {
         return [];
     }
 
     /// Ditto
-    override Type type() pure nothrow @property
+    override inout(Type) type() inout @safe pure nothrow @property
     {
         return Type.invalid;
     }
@@ -415,14 +421,14 @@ class StructDeclaration : TypeDeclaration
     mixin(generateSyntaxNode);
 
     /// Ditto
-    override Type type() pure nothrow @property
+    override inout(Type) type() inout @safe pure nothrow @property
     {
         return Type.struct_;
     }
 
-    override FieldDeclaration[] getFields() pure nothrow @property
+    override inout(FieldDeclaration[]) getFields() inout @safe pure nothrow @property
     {
-        return parameters.to!(FieldDeclaration[]);
+        return (() @trusted => cast(FieldDeclaration[]) parameters)();
     }
 }
 
@@ -453,31 +459,31 @@ class ClassDeclaration : TypeDeclaration
     mixin(generateSyntaxNode);
 
     /// Ditto
-    override Type type() pure nothrow @property
+    override inout(Type) type() inout @safe pure nothrow @property
     {
         return Type.struct_;
     }
 
     /// Resolves superclasses.
-    void resolve(Module file)
+    void resolve(Module file) @safe nothrow
     {
         if (hasSuperclass())
         {
             foreach (superclass; superclassNames)
             {
-                superclasses ~= cast(ClassDeclaration) file.findType(superclass);
+                superclasses ~= (() @trusted => cast(ClassDeclaration) file.findType(superclass))();
             }
         }
     }
 
     /// Checks whether this ClassDeclaration has a super class.
-    bool hasSuperclass() pure inout @nogc @property
+    bool hasSuperclass() pure nothrow inout @nogc @safe @property
     {
         return superclassNames.length > 0;
     }
 
     /// Get the direct parents of this dclass.
-    ClassDeclaration[] parents() pure @property
+    ClassDeclaration[] parents() pure @safe @property
     {
         return superclasses;
     }
@@ -489,7 +495,7 @@ class ClassDeclaration : TypeDeclaration
     }
 
     /// Ditto.
-    override FieldDeclaration[] getFields() pure nothrow @property
+    override inout(FieldDeclaration[]) getFields() inout @safe pure nothrow @property
     {
         return fields;
     }
@@ -514,7 +520,7 @@ class AliasDeclaration : TypeDeclaration
     mixin(generateSyntaxNode);
 
     /// Ditto
-    override Type type() pure nothrow @property
+    override inout(Type) type() inout @safe pure nothrow @property
     {
         enum types = genbuiltins;
 
@@ -527,7 +533,7 @@ class AliasDeclaration : TypeDeclaration
     }
 
     /// Ditto.
-    override FieldDeclaration[] getFields() pure nothrow @property
+    override inout(FieldDeclaration[]) getFields() inout @safe pure nothrow @property
     {
         return [];
     }
@@ -825,7 +831,7 @@ class NumericParameter : Parameter
     override string parameterTypeName() @property
     {
         return type;
-}
+    }
 }
 
 /// Represents the minimum and maximum value of a NumericParameter.
@@ -933,7 +939,7 @@ class SizedParameter : Parameter
     override string parameterTypeName() @property
     {
         return type;
-}
+    }
 }
 
 /// Represents the constraints on a SizedParameter.
