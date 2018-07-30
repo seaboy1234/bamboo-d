@@ -2,6 +2,17 @@ module bamboo.codegen.helpers;
 
 import bamboo.codegen;
 
+mixin template ParentConstructors()
+{
+    static foreach(ctor; __traits(getOverloads, typeof(super), "__ctor", true))
+    {
+        this(Parameters!ctor args)
+        {
+            super(args);
+        }
+    }
+}
+
 string generateDefinition(Parameter parameter)
 {
     switch (parameter.syntaxKind)

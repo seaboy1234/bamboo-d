@@ -1,3 +1,4 @@
+#!/usr/bin/env dub
 /+ dub.sdl:
 	name "generate_parser"
     dependency "pegged" version="~>0.4.3"

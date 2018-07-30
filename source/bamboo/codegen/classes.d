@@ -38,6 +38,8 @@ string generateClass(ClassDeclaration cls, string baseType, bool generateStubs)
         assert(0, "Constructors are not supported.");
     }
 
+    format ~= "mixin ParentConstructors; ";
+
     foreach (field; cls.fields)
     {
         format ~= generateField(field, generateStubs);

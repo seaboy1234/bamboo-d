@@ -68,6 +68,16 @@ string generateModule(Module file, string baseType = "", bool generateStubs = tr
 
     format ~= "import std.typecons;";
 
+    if (file.keywords.length)
+    {
+        format ~= " enum {";
+        foreach (id, keyword; file.keywords)
+        {
+            format ~= q{%1$s = 1 << %2$s,}.format(keyword.symbol, id + 1);
+        }
+        format ~= "} ";
+    }
+
     foreach (type; file.typesById)
     {
         if (auto cls = cast(ClassDeclaration) type)
