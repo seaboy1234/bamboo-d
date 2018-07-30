@@ -4,6 +4,8 @@ import bamboo.codegen;
 
 mixin template ParentConstructors()
 {
+    import std.traits : Parameters;
+    
     static foreach(ctor; __traits(getOverloads, typeof(super), "__ctor", true))
     {
         this(Parameters!ctor args)
