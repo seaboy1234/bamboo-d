@@ -4,13 +4,16 @@ import bamboo.codegen;
 
 mixin template ParentConstructors()
 {
-    import std.traits : Parameters;
-    
-    static foreach(ctor; __traits(getOverloads, typeof(super), "__ctor", true))
+    import std.traits : Parameters, FunctionTypeOf;
+
+    static if (!is(FunctionTypeOf!(super.__ctor) == void))
     {
-        this(Parameters!ctor args)
+        static foreach (ctor; __traits(getOverloads, typeof(super), "__ctor", true))
         {
-            super(args);
+            this(Parameters!ctor args)
+            {
+                ctor(args);
+            }
         }
     }
 }
@@ -259,4 +262,3 @@ string generateName(string name, string type, int counter)
     }
     return name;
 }
-
