@@ -6,13 +6,16 @@ mixin template ParentConstructors()
 {
     import std.traits : Parameters, FunctionTypeOf;
 
-    static if (!is(FunctionTypeOf!(super.__ctor) == void))
+    static if (is(super.ctor))
     {
-        static foreach (ctor; __traits(getOverloads, typeof(super), "__ctor", true))
+        static if (!is(FunctionTypeOf!(super.__ctor) == void))
         {
-            this(Parameters!ctor args)
+            static foreach (ctor; __traits(getOverloads, typeof(super), "__ctor", true))
             {
-                ctor(args);
+                this(Parameters!ctor args)
+                {
+                    ctor(args);
+                }
             }
         }
     }
