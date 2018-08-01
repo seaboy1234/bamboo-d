@@ -133,7 +133,7 @@ unittest
             float _ty;
         }
 
-        override string name()
+        override inout(string) name() inout
         {
             return _name;
         }
