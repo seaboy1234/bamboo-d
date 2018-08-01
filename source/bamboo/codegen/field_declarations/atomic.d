@@ -9,7 +9,15 @@ string generateAtomic(AtomicField field, bool stub)
 
     bool isComplex = field.parameters.length > 1;
     bool isProperty = field.name.startsWith("set");
-    string name;
+    
+    string name = (() @trusted {
+        if (!isProperty)
+        {
+            return field.name;
+        }
+
+        return cast(char)(field.name[3].toLower) ~ field.name[4 .. $];
+    });
 
     int counter = field.id;
 
@@ -32,7 +40,7 @@ string generateAtomic(AtomicField field, bool stub)
                 string type = parts[0];
                 string param = parts[1];
 
-                format ~= type ~ "," ~ "`" ~ param ~"`,";
+                format ~= type ~ "," ~ "`" ~ param ~ "`,";
             }
             format ~= ") _" ~ name ~ "; ";
         }
@@ -47,26 +55,6 @@ string generateAtomic(AtomicField field, bool stub)
         }
 
         return format;
-
-    }
-
-    string getFieldName()
-    {
-        string name;
-
-        if (!isProperty || isComplex)
-        {
-            return field.name;
-        }
-
-        name = cast(char)(field.name[3].toLower) ~ field.name[4 .. $];
-
-        if (name[1 .. $].count!(x => isUpper(cast(dchar) x)) == name.length - 1)
-        {
-            name = field.name[3 .. $];
-        }
-
-        return name;
     }
 
     string generateAtomicDeclaration(out string fieldType)
@@ -208,8 +196,6 @@ string generateAtomic(AtomicField field, bool stub)
     }
 
     autogenParameterNames(field);
-
-    name = getFieldName();
 
     if (stub && isProperty)
     {
