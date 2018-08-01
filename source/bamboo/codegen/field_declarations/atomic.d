@@ -9,7 +9,7 @@ string generateAtomic(AtomicField field, bool stub)
 
     bool isComplex = field.parameters.length > 1;
     bool isProperty = field.name.startsWith("set");
-    
+
     string name = (() @trusted{
         if (!isProperty)
         {
@@ -94,7 +94,7 @@ string generateAtomic(AtomicField field, bool stub)
 
         if (!isComplex && isProperty)
         {
-            format ~= "@property ";
+            format ~= "@property";
         }
 
         return format;
@@ -103,12 +103,12 @@ string generateAtomic(AtomicField field, bool stub)
     string generateComplexSetter()
     {
         return q{
-            final void %1$s(%2$s value) @property
+            final void %1$s(%2$s value)
             {
                 %1$s(value.expand);
             }
 
-            final void %1$s(Tuple!(_%1$s.Types) value) @property
+            final void %1$s(Tuple!(%2$s.Types) value)
             {
                 %1$s(value.expand);
             }
@@ -183,28 +183,20 @@ string generateAtomic(AtomicField field, bool stub)
         string format;
 
         format ~= "@FieldId(" ~ field.id.to!string ~ ") ";
-
         if (!isComplex)
         {
-            if (!stub)
-            {
-                format ~= "abstract " ~ fieldType ~ " " ~ name ~ "() @property;";
-            }
-            else
-            {
-                format ~= fieldType ~ " " ~ name ~ "() @property { ";
-                format ~= "return _" ~ name ~ ";";
-                format ~= "}";
-            }
+            format ~= "@property ";
+        }
+
+        if (!stub)
+        {
+            format ~= "abstract " ~ fieldType ~ " " ~ name ~ "();";
         }
         else
         {
-            if (stub)
-            {
-                format ~= "auto " ~ name ~ "() {";
-                format ~= "return _" ~ name ~ ";";
-                format ~= "}";
-            }
+            format ~= fieldType ~ " " ~ name ~ "() { ";
+            format ~= "return _" ~ name ~ ";";
+            format ~= "}";
         }
 
         return format;
@@ -223,7 +215,7 @@ string generateAtomic(AtomicField field, bool stub)
 
     if (isProperty)
     {
-        if(isComplex)
+        if (isComplex)
         {
             generated ~= generateComplexSetter();
         }
