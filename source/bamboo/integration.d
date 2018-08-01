@@ -121,42 +121,13 @@ unittest
     // Can we override one?
     class DistributedAvatarTest : DistributedAvatar
     {
-        private
-        {
-            string _name;
-            float _x;
-            float _y;
-            float _z;
-            short _h;
 
-            float _tx;
-            float _ty;
-        }
-
-        override inout(string) name() inout
-        {
-            return _name;
-        }
-
-        override void name(string value) @property
-        {
-            _name = value;
-        }
-
-        override void setXYZH(float x, float y, float z, short h)
-        {
-            _x = x;
-            _y = y;
-            _z = z;
-            _h = h;
-        }
-
-        override void indicateIntent(float x, float y)
-        {
-            _tx = x;
-            _ty = y;
-        }
     }
+
+    auto obj = new DistributedAvatarTest();
+
+    obj.xyzh = tuple(1, 1, 1, short(1));
+    assert(obj.xyzh == tuple(1f, 1f, 1f, short(1)));
 }
 
 unittest
