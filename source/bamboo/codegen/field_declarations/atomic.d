@@ -108,16 +108,11 @@ string generateAtomic(AtomicField field, bool stub)
     string generateComplexSetter()
     {
         return q{
-            final void %1$s(%2$s value)
+            void %1$s(T)(T value) if(__traits(compiles, %1$s(value.expand)))
             {
                 %1$s(value.expand);
             }
-
-            final void %1$s(Tuple!(%2$s.Types) value)
-            {
-                %1$s(value.expand);
-            }
-        }.format(name, fieldType);
+        }.format(name);
     }
 
     string generateContracts()
