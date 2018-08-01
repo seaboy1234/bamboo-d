@@ -10,14 +10,14 @@ string generateAtomic(AtomicField field, bool stub)
     bool isComplex = field.parameters.length > 1;
     bool isProperty = field.name.startsWith("set");
     
-    string name = (() @trusted {
+    string name = (() @trusted{
         if (!isProperty)
         {
             return field.name;
         }
 
         return cast(char)(field.name[3].toLower) ~ field.name[4 .. $];
-    });
+    })();
 
     int counter = field.id;
 
