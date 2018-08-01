@@ -100,6 +100,21 @@ string generateAtomic(AtomicField field, bool stub)
         return format;
     }
 
+    string generateComplexSetter()
+    {
+        return q{
+            final void %1$s(%2$s value) @property
+            {
+                %1$s(value.expand);
+            }
+
+            final void %1$s(Tuple!(_%1$s.Types) value) @property
+            {
+                %1$s(value.expand);
+            }
+        }.format(name, fieldType);
+    }
+
     string generateContracts()
     {
         string contracts;
@@ -208,7 +223,13 @@ string generateAtomic(AtomicField field, bool stub)
 
     if (isProperty)
     {
+        if(isComplex)
+        {
+            generated ~= generateComplexSetter();
+        }
         generated ~= generateGetter();
+        generated ~= text("alias ", field.name, " = ", name, ";"); // setField
+        generated ~= text("alias get", field.name[3 .. $], " = ", name, ";"); // getField
     }
 
     return generated;
