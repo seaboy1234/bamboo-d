@@ -16,6 +16,11 @@ string generateAtomic(AtomicField field, bool stub)
             return field.name;
         }
 
+        if (field.name[3 .. $].all!(x => isUpper(x)))
+        {
+            return field.name[3 .. $].toLower;
+        }
+
         return cast(char)(field.name[3].toLower) ~ field.name[4 .. $];
     })();
 
